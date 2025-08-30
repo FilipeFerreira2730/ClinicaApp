@@ -1,0 +1,54 @@
+# Build Folders
+bin/
+obj/
+
+# Visual Studio
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# DotNet
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# EF Core Migrations (opcional, se quiseres versionar migrations mantém, senão ignora)
+# Migrations/
+
+# Database files
+*.mdf
+*.ldf
+*.db
+
+# Logs
+*.log
+
+# Publish folder
+publish/
+
+# Secret configuration files
+appsettings.Development.json
+secrets.json
+
+# NuGet
+*.nupkg
+packages/
+.nuget/
+
+# Resharper
+_ReSharper*/
+*.DotSettings.user
+
+# Others
+*.bak
+*.backup
+*.swp
+*.tmp
