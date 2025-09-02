@@ -20,10 +20,21 @@ builder.Services.AddScoped<ProfissionalService>();
 builder.Services.AddScoped<ReservaService>();
 builder.Services.AddScoped<UserService>();
 
+// Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
 
 // Pipeline
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+
+    app.UseDeveloperExceptionPage();
+}
+else
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
@@ -33,12 +44,15 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
+
+// -----------------------------
 // Minimal APIs CRUD para Salas
+// -----------------------------
 app.MapGet("/api/salas", async (SalaService service) => await service.GetAllAsync());
 app.MapGet("/api/salas/{id:int}", async (int id, SalaService service) =>
 {
     var sala = await service.GetByIdAsync(id);
-    return sala is not null ? Results.Ok(sala) : Results.NotFound();
+    return sala is not null ? Results.Ok(sala) : Results.Ok("Sala não existe");
 });
 app.MapPost("/api/salas", async (Sala sala, SalaService service) =>
 {
@@ -47,22 +61,32 @@ app.MapPost("/api/salas", async (Sala sala, SalaService service) =>
 });
 app.MapPut("/api/salas/{id:int}", async (int id, Sala sala, SalaService service) =>
 {
-    if (id != sala.Id) return Results.BadRequest();
-    await service.UpdateAsync(sala);
+    var existingSala = await service.GetByIdAsync(id);
+    if (existingSala is null)
+        return Results.NotFound($"Sala com ID {id} não existe.");
+
+    // Atualiza apenas os campos que existem
+    existingSala.Nome = sala.Nome;
+
+    await service.UpdateAsync(existingSala);
     return Results.NoContent();
 });
+
 app.MapDelete("/api/salas/{id:int}", async (int id, SalaService service) =>
 {
     await service.DeleteAsync(id);
     return Results.NoContent();
 });
 
+
+// ---------------------------------
 // Minimal APIs CRUD para Profissionais
+// ---------------------------------
 app.MapGet("/api/profissionais", async (ProfissionalService service) => await service.GetAllAsync());
 app.MapGet("/api/profissionais/{id:int}", async (int id, ProfissionalService service) =>
 {
     var p = await service.GetByIdAsync(id);
-    return p is not null ? Results.Ok(p) : Results.NotFound();
+    return p is not null ? Results.Ok(p) : Results.Ok("Profissional não existe");
 });
 app.MapPost("/api/profissionais", async (Profissional p, ProfissionalService service) =>
 {
@@ -81,12 +105,15 @@ app.MapDelete("/api/profissionais/{id:int}", async (int id, ProfissionalService 
     return Results.NoContent();
 });
 
+
+// -----------------------------
 // Minimal APIs CRUD para Reservas
+// -----------------------------
 app.MapGet("/api/reservas", async (ReservaService service) => await service.GetAllAsync());
 app.MapGet("/api/reservas/{id:int}", async (int id, ReservaService service) =>
 {
     var r = await service.GetByIdAsync(id);
-    return r is not null ? Results.Ok(r) : Results.NotFound();
+    return r is not null ? Results.Ok(r) : Results.Ok("Reserva não existe");
 });
 app.MapPost("/api/reservas", async (Reserva r, ReservaService service) =>
 {
@@ -105,12 +132,15 @@ app.MapDelete("/api/reservas/{id:int}", async (int id, ReservaService service) =
     return Results.NoContent();
 });
 
-// Minimal APIs CRUD para Users com validação
+
+// -----------------------------
+// Minimal APIs CRUD para Users
+// -----------------------------
 app.MapGet("/api/users", async (UserService service) => await service.GetAllAsync());
 app.MapGet("/api/users/{id:int}", async (int id, UserService service) =>
 {
     var u = await service.GetByIdAsync(id);
-    return u is not null ? Results.Ok(u) : Results.NotFound();
+    return u is not null ? Results.Ok(u) : Results.Ok("User não existe");
 });
 app.MapPost("/api/users", async (User u, UserService service) =>
 {
@@ -145,7 +175,10 @@ app.MapDelete("/api/users/{id:int}", async (int id, UserService service) =>
     return Results.NoContent();
 });
 
+
+// -----------------------------
 // Razor Components
+// -----------------------------
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
