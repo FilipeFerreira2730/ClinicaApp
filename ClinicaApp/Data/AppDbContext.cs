@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Reflection.Emit;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace ClinicaApp.Data
 {
@@ -11,6 +9,8 @@ namespace ClinicaApp.Data
         public DbSet<Sala> Salas { get; set; }
         public DbSet<Profissional> Profissionais { get; set; }
         public DbSet<Reserva> Reservas { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -20,16 +20,19 @@ namespace ClinicaApp.Data
             modelBuilder.Entity<Sala>(e =>
             {
                 e.Property(p => p.Nome).IsRequired().HasMaxLength(100);
-                e.HasIndex(p => p.Nome).IsUnique(); // evita nomes de sala duplicados
+                e.HasIndex(p => p.Nome).IsUnique();
             });
 
             // Profissional
             modelBuilder.Entity<Profissional>(e =>
             {
-                e.Property(p => p.Nome).IsRequired().HasMaxLength(150);
                 e.Property(p => p.Especialidade).HasMaxLength(100);
-                e.Property(p => p.Email).HasMaxLength(200);
-                e.Property(p => p.Telefone).HasMaxLength(50);
+
+                // Relação 1:1 com User
+                e.HasOne(p => p.User)
+                 .WithOne(u => u.Profissional)
+                 .HasForeignKey<Profissional>(p => p.UserId)
+                 .OnDelete(DeleteBehavior.Cascade);
             });
 
             // Reserva
@@ -48,8 +51,34 @@ namespace ClinicaApp.Data
                  .HasForeignKey(r => r.ProfissionalId)
                  .OnDelete(DeleteBehavior.Restrict);
 
-                // índice útil para pesquisar disponibilidade rapidamente
+                e.HasOne(r => r.User)
+                 .WithMany()
+                 .HasForeignKey(r => r.UserId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
                 e.HasIndex(r => new { r.SalaId, r.DataHoraInicio, r.DataHoraFim });
+            });
+
+            // Role
+            modelBuilder.Entity<Role>(e =>
+            {
+                e.Property(p => p.Nome).IsRequired().HasMaxLength(50);
+                e.HasIndex(p => p.Nome).IsUnique();
+            });
+
+            // User
+            modelBuilder.Entity<User>(e =>
+            {
+                e.Property(p => p.Nome).IsRequired().HasMaxLength(150);
+                e.Property(p => p.Email).IsRequired().HasMaxLength(200);
+                e.Property(p => p.Telefone).HasMaxLength(50);
+
+                e.HasOne(u => u.Role)
+                 .WithMany()
+                 .HasForeignKey(u => u.RoleId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasIndex(u => u.Email).IsUnique();
             });
         }
     }
