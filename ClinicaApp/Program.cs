@@ -1,8 +1,11 @@
-using ClinicaApp.Components;
+﻿using ClinicaApp.Components;
 using ClinicaApp.Data;
+using ClinicaApp.DTO;
 using ClinicaApp.Services;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Cryptography;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +17,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Registrar os servi�os
+// Registrar os serviços
 builder.Services.AddScoped<SalaService>();
 builder.Services.AddScoped<ProfissionalService>();
 builder.Services.AddScoped<ReservaService>();
@@ -31,7 +34,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-
     app.UseDeveloperExceptionPage();
 }
 else
@@ -44,137 +46,206 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
+// -----------------------------
+// CRUD Salas
+// -----------------------------
+app.MapGet("/api/salas", async (SalaService service) =>
+{
+    var salas = await service.GetAllAsync();
+    return salas.Any() ? Results.Ok(salas) : Results.Ok("Não existem salas cadastradas.");
+});
 
-// -----------------------------
-// Minimal APIs CRUD para Salas
-// -----------------------------
-app.MapGet("/api/salas", async (SalaService service) => await service.GetAllAsync());
 app.MapGet("/api/salas/{id:int}", async (int id, SalaService service) =>
 {
     var sala = await service.GetByIdAsync(id);
-    return sala is not null ? Results.Ok(sala) : Results.Ok("Sala n�o existe");
+    return sala != null ? Results.Ok(sala) : Results.NotFound("Sala não existe.");
 });
+
 app.MapPost("/api/salas", async (Sala sala, SalaService service) =>
 {
     await service.AddAsync(sala);
-    return Results.Created($"/api/salas/{sala.Id}", sala);
+    return Results.Ok($"Sala '{sala.Nome}' criada com sucesso. ID: {sala.Id}");
 });
+
 app.MapPut("/api/salas/{id:int}", async (int id, Sala sala, SalaService service) =>
 {
-    var existingSala = await service.GetByIdAsync(id);
-    if (existingSala is null)
-        return Results.NotFound($"Sala com ID {id} n�o existe.");
+    var existing = await service.GetByIdAsync(id);
+    if (existing == null) return Results.NotFound("Sala não existe.");
 
-    // Atualiza apenas os campos que existem
-    existingSala.Nome = sala.Nome;
-
-    await service.UpdateAsync(existingSala);
-    return Results.NoContent();
+    existing.Nome = sala.Nome;
+    await service.UpdateAsync(existing);
+    return Results.Ok($"Sala '{existing.Nome}' editada com sucesso.");
 });
 
 app.MapDelete("/api/salas/{id:int}", async (int id, SalaService service) =>
 {
     await service.DeleteAsync(id);
-    return Results.NoContent();
+    return Results.Ok($"Sala ID {id} eliminada com sucesso.");
 });
 
+// -----------------------------
+// CRUD Profissionais (DTO para GET, entidade para POST/PUT/DELETE)
+// -----------------------------
+app.MapGet("/api/profissionais", async (ProfissionalService service) =>
+{
+    var dtos = await service.GetAllAsync();
+    return dtos.Any() ? Results.Ok(dtos) : Results.Ok("Não existem profissionais cadastrados.");
+});
 
-// ---------------------------------
-// Minimal APIs CRUD para Profissionais
-// ---------------------------------
-app.MapGet("/api/profissionais", async (ProfissionalService service) => await service.GetAllAsync());
 app.MapGet("/api/profissionais/{id:int}", async (int id, ProfissionalService service) =>
 {
-    var p = await service.GetByIdAsync(id);
-    return p is not null ? Results.Ok(p) : Results.Ok("Profissional n�o existe");
+    var dto = await service.GetByIdAsync(id);
+    return dto != null ? Results.Ok(dto) : Results.NotFound("Profissional não existe.");
 });
-app.MapPost("/api/profissionais", async (Profissional p, ProfissionalService service) =>
+
+app.MapPost("/api/profissionais", async (Profissional p, ProfissionalService service, UserService userService) =>
 {
+    var user = await userService.GetEntityByIdAsync(p.UserId);
+    if (user == null) return Results.NotFound("User não existe.");
+
+    if (user.RoleId != 1 && user.RoleId != 2)
+        return Results.BadRequest("Apenas usuários com RoleId 1 ou 2 podem ser profissionais.");
+
     await service.AddAsync(p);
-    return Results.Created($"/api/profissionais/{p.Id}", p);
+    return Results.Ok($"Profissional da especialidade '{p.Especialidade}' criado com sucesso. ID: {p.Id}");
 });
+
 app.MapPut("/api/profissionais/{id:int}", async (int id, Profissional p, ProfissionalService service) =>
 {
-    if (id != p.Id) return Results.BadRequest();
-    await service.UpdateAsync(p);
-    return Results.NoContent();
+    var entity = await service.GetEntityByIdAsync(id);
+    if (entity == null) return Results.NotFound("Profissional não existe.");
+
+    // Só altera a especialidade
+    entity.Especialidade = p.Especialidade;
+
+    await service.UpdateAsync(entity);
+    return Results.Ok($"Profissional da especialidade '{entity.Especialidade}' editado com sucesso.");
 });
+
 app.MapDelete("/api/profissionais/{id:int}", async (int id, ProfissionalService service) =>
 {
     await service.DeleteAsync(id);
-    return Results.NoContent();
+    return Results.Ok($"Profissional ID {id} eliminado com sucesso.");
 });
 
+// -----------------------------
+// CRUD Reservas
+// -----------------------------
+app.MapGet("/api/reservas", async (ReservaService service) =>
+{
+    var reservas = await service.GetAllAsync(); // devolve DTOs
+    return reservas.Any() ? Results.Ok(reservas) : Results.Ok("Não existem reservas cadastradas.");
+});
 
-// -----------------------------
-// Minimal APIs CRUD para Reservas
-// -----------------------------
-app.MapGet("/api/reservas", async (ReservaService service) => await service.GetAllAsync());
 app.MapGet("/api/reservas/{id:int}", async (int id, ReservaService service) =>
 {
-    var r = await service.GetByIdAsync(id);
-    return r is not null ? Results.Ok(r) : Results.Ok("Reserva n�o existe");
+    var r = await service.GetByIdAsync(id); // devolve DTO
+    return r != null ? Results.Ok(r) : Results.NotFound("Reserva não existe.");
 });
+
 app.MapPost("/api/reservas", async (Reserva r, ReservaService service) =>
 {
     await service.AddAsync(r);
-    return Results.Created($"/api/reservas/{r.Id}", r);
+    return Results.Ok($"Reserva criada com sucesso: Sala {r.SalaId}, Profissional {r.ProfissionalId}, ID: {r.Id}");
 });
+
 app.MapPut("/api/reservas/{id:int}", async (int id, Reserva r, ReservaService service) =>
 {
-    if (id != r.Id) return Results.BadRequest();
-    await service.UpdateAsync(r);
-    return Results.NoContent();
+    var existing = await service.GetEntityByIdAsync(id);
+    if (existing == null) return Results.NotFound("Reserva não existe.");
+
+    existing.SalaId = r.SalaId;
+    existing.ProfissionalId = r.ProfissionalId;
+    existing.DataHoraInicio = r.DataHoraInicio;
+    existing.DataHoraFim = r.DataHoraFim;
+    existing.UserId = r.UserId;
+
+    await service.UpdateAsync(existing);
+    return Results.Ok($"Reserva ID {existing.Id} editada com sucesso.");
 });
+
 app.MapDelete("/api/reservas/{id:int}", async (int id, ReservaService service) =>
 {
     await service.DeleteAsync(id);
-    return Results.NoContent();
+    return Results.Ok($"Reserva ID {id} eliminada com sucesso.");
 });
 
+// -----------------------------
+// USERS (DTO para GET, entidade para POST/PUT/DELETE)
+// -----------------------------
+app.MapGet("/api/users", async (UserService service) =>
+{
+    var dtos = await service.GetAllAsync();
+    return dtos.Any() ? Results.Ok(dtos) : Results.Ok("Não existem users cadastrados.");
+});
 
-// -----------------------------
-// Minimal APIs CRUD para Users
-// -----------------------------
-app.MapGet("/api/users", async (UserService service) => await service.GetAllAsync());
 app.MapGet("/api/users/{id:int}", async (int id, UserService service) =>
 {
-    var u = await service.GetByIdAsync(id);
-    return u is not null ? Results.Ok(u) : Results.Ok("User n�o existe");
+    var dto = await service.GetByIdAsync(id);
+    return dto != null ? Results.Ok(dto) : Results.NotFound("User não existe.");
 });
+
 app.MapPost("/api/users", async (User u, UserService service) =>
 {
     var validationContext = new ValidationContext(u);
     var validationResults = new List<ValidationResult>();
     if (!Validator.TryValidateObject(u, validationContext, validationResults, true))
-    {
         return Results.BadRequest(validationResults.Select(vr => vr.ErrorMessage));
-    }
 
     await service.AddAsync(u);
-    return Results.Created($"/api/users/{u.Id}", u);
+    return Results.Ok($"User '{u.Nome}' criado com sucesso. ID: {u.Id}");
 });
+
+// -----------------------------
+// Invite (profissionais apenas)
+// -----------------------------
+app.MapPost("/api/users/invite", async (User u, UserService service) =>
+{
+    if (u.RoleId != 2)
+        return Results.BadRequest("Este endpoint é apenas para criar profissionais (RoleId=2).");
+
+    u.PasswordHash = null;
+    u.PasswordSalt = null;
+
+    await service.AddAsync(u);
+    return Results.Ok($"Profissional '{u.Nome}' convidado com sucesso. ID: {u.Id}");
+});
+
+// -----------------------------
+// Definir senha (usa entidade real, não DTO)
+// -----------------------------
+app.MapPost("/api/users/set-password", async (int userId, string password, UserService service) =>
+{
+    var userEntity = await service.GetEntityByIdAsync(userId);
+    if (userEntity == null) return Results.NotFound("User não existe.");
+
+    using var hmac = new HMACSHA512();
+    userEntity.PasswordSalt = hmac.Key;
+    userEntity.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+
+    await service.UpdateAsync(userEntity);
+    return Results.Ok($"Password definida com sucesso para o user '{userEntity.Nome}'.");
+});
+
 app.MapPut("/api/users/{id:int}", async (int id, User u, UserService service) =>
 {
-    if (id != u.Id)
-        return Results.BadRequest("O ID da rota n�o coincide com o ID do user.");
+    var entity = await service.GetEntityByIdAsync(id);
+    if (entity == null) return Results.NotFound("User não existe.");
 
-    var validationContext = new ValidationContext(u);
-    var validationResults = new List<ValidationResult>();
-    if (!Validator.TryValidateObject(u, validationContext, validationResults, true))
-    {
-        return Results.BadRequest(validationResults.Select(vr => vr.ErrorMessage));
-    }
+    entity.Nome = u.Nome;
+    entity.Email = u.Email;
+    entity.Telefone = u.Telefone;
+    entity.RoleId = u.RoleId;
 
-    await service.UpdateAsync(u);
-    return Results.NoContent();
+    await service.UpdateAsync(entity);
+    return Results.Ok($"User '{entity.Nome}' editado com sucesso.");
 });
+
 app.MapDelete("/api/users/{id:int}", async (int id, UserService service) =>
 {
     await service.DeleteAsync(id);
-    return Results.NoContent();
+    return Results.Ok($"User ID {id} eliminado com sucesso.");
 });
-
 
 // -----------------------------
 // Razor Components

@@ -80,6 +80,13 @@ namespace ClinicaApp.Data
 
                 e.HasIndex(u => u.Email).IsUnique();
             });
+
+            // Seed das Roles fixas
+            modelBuilder.Entity<Role>().HasData(
+                new Role { Id = 1, Nome = "Admin" },
+                new Role { Id = 2, Nome = "UserManager" },
+                new Role { Id = 3, Nome = "User" }
+            );
         }
     }
 }
