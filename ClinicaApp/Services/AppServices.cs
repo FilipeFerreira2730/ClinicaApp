@@ -239,6 +239,7 @@ namespace ClinicaApp.Services
             await _context.SaveChangesAsync();
 
             return user;
+
         }
     }
 }
