@@ -1,0 +1,291 @@
+﻿@page "/UserManagement"
+@using ClinicaApp.DTO
+@using System.ComponentModel.DataAnnotations
+@inject HttpClient Http
+@inject IJSRuntime JsRuntime
+
+@rendermode InteractiveServer
+
+<h3>Gestão de Utilizadores & Profissionais</h3>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h4>@(editMode ? "Editar User/Profissional" : "Criar Novo User/Profissional")</h4>
+
+        <EditForm Model="@currentUser" OnValidSubmit="SaveUser" FormName="userForm">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-2">
+                <label class="form-label">Nome *</label>
+                <InputText class="form-control" @bind-Value="currentUser.Nome" />
+                <ValidationMessage For="@(() => currentUser.Nome)" />
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label">Email *</label>
+                <InputText class="form-control" @bind-Value="currentUser.Email" />
+                <ValidationMessage For="@(() => currentUser.Email)" />
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label">Telefone</label>
+                <InputText class="form-control" @bind-Value="currentUser.Telefone" />
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label">Role *</label>
+                <InputSelect class="form-control" @bind-Value="currentUser.RoleId">
+                    @foreach (var role in roles)
+                    {
+                        <option value="@role.Key">@role.Value</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="mb-2">
+                <label class="form-label">Especialidade (Profissional)</label>
+                <InputText class="form-control" @bind-Value="currentProfissional.Especialidade" />
+            </div>
+
+            <button type="submit" class="btn btn-success me-2" disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <text>
+                        <span class="spinner-border spinner-border-sm" role="status"></span>
+                        A processar...
+                    </text>
+                }
+                else
+                {
+                    <text>@(editMode ? "Guardar Alterações" : "Criar")</text>
+                }
+            </button>
+
+
+            <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Cancelar</button>
+
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <div class="alert alert-success mt-3">@successMessage</div>
+            }
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger mt-3">@errorMessage</div>
+            }
+        </EditForm>
+    </div>
+</div>
+
+<h4>Lista de Utilizadores</h4>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Telefone</th>
+            <th>Role</th>
+            <th>Profissional</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (users == null)
+        {
+            <tr>
+                <td colspan="7" class="text-center text-muted">
+                    <span class="spinner-border spinner-border-sm" role="status"></span> A carregar...
+                </td>
+            </tr>
+        }
+        else if (!users.Any())
+        {
+            <tr>
+                <td colspan="7" class="text-center text-muted">Não existem utilizadores.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var u in users)
+            {
+                <tr>
+                    <td>@u.Id</td>
+                    <td>@u.Nome</td>
+                    <td>@u.Email</td>
+                    <td>@u.Telefone</td>
+                    <td>@u.RoleNome</td>
+                    <td>@(u.Profissional != null ? u.Profissional.Especialidade : "-")</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning me-2" @onclick="() => EditUser(u)">Editar</button>
+                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteUser(u.Id)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<UserDto>? users;
+    private UserDto currentUser = new();
+    private ProfissionalDto currentProfissional = new();
+    private bool editMode;
+    private bool isLoading;
+    private string errorMessage = string.Empty;
+    private string successMessage = string.Empty;
+
+    // Dropdown de Roles: apenas Admin e Profissional
+    private Dictionary<int, string> roles = new()
+    {
+        { 1, "Admin" },
+        { 2, "Profissional" }
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        try
+        {
+            isLoading = true;
+            users = await Http.GetFromJsonAsync<List<UserDto>>("https://localhost:44357/api/users");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erro ao carregar utilizadores: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void EditUser(UserDto user)
+    {
+        currentUser = new UserDto
+        {
+            Id = user.Id,
+            Nome = user.Nome,
+            Email = user.Email,
+            Telefone = user.Telefone,
+            RoleId = user.RoleId,
+            RoleNome = user.RoleNome
+        };
+
+        currentProfissional = user.Profissional != null
+            ? new ProfissionalDto
+            {
+                Id = user.Profissional.Id,
+                UserId = user.Id,
+                Especialidade = user.Profissional.Especialidade
+            }
+            : new ProfissionalDto();
+
+        editMode = true;
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+    }
+
+    private async Task SaveUser()
+    {
+        isLoading = true;
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+
+        try
+        {
+            HttpResponseMessage response;
+
+            if (editMode)
+            {
+                response = await Http.PutAsJsonAsync($"https://localhost:44357/api/users/{currentUser.Id}", currentUser);
+            }
+            else
+            {
+                response = await Http.PostAsJsonAsync("https://localhost:44357/api/users", currentUser);
+            }
+
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Criar ou atualizar Profissional
+                if (!string.IsNullOrWhiteSpace(currentProfissional.Especialidade))
+                {
+                    if (currentProfissional.Id > 0)
+                        await Http.PutAsJsonAsync($"https://localhost:44357/api/profissionais/{currentProfissional.Id}", currentProfissional);
+                    else
+                    {
+                        var novoUser = editMode ? currentUser : await response.Content.ReadFromJsonAsync<UserDto>();
+                        currentProfissional.UserId = novoUser?.Id ?? 0;
+                        await Http.PostAsJsonAsync("https://localhost:44357/api/profissionais", currentProfissional);
+                    }
+                }
+
+                successMessage = editMode ? "User atualizado com sucesso!" : "User criado com sucesso!";
+                await LoadUsers();
+                CancelEdit();
+            }
+            else
+            {
+                errorMessage = string.IsNullOrWhiteSpace(responseBody) ? $"Erro: {response.StatusCode}" : responseBody;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erro inesperado: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task DeleteUser(int id)
+    {
+        try
+        {
+            if (await JsRuntime.InvokeAsync<bool>("confirm", "Tem a certeza que quer eliminar este user?"))
+            {
+                isLoading = true;
+                var response = await Http.DeleteAsync($"https://localhost:44357/api/users/{id}");
+                var responseBody = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    successMessage = "User eliminado com sucesso!";
+                    await LoadUsers();
+                }
+                else
+                {
+                    errorMessage = string.IsNullOrWhiteSpace(responseBody) ? $"Erro: {response.StatusCode}" : responseBody;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erro: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void CancelEdit()
+    {
+        currentUser = new UserDto();
+        currentProfissional = new ProfissionalDto();
+        editMode = false;
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+    }
+}

@@ -13,11 +13,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// HttpClient para chamadas à API
+builder.Services.AddHttpClient("ClinicaAPI", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:44357/api/");
+});
+
 // Adicionar DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Registrar os serviços
+// Registrar os serviços (camada de negócio)
 builder.Services.AddScoped<SalaService>();
 builder.Services.AddScoped<ProfissionalService>();
 builder.Services.AddScoped<ReservaService>();
@@ -192,8 +198,24 @@ app.MapPost("/api/users", async (User u, UserService service) =>
     if (!Validator.TryValidateObject(u, validationContext, validationResults, true))
         return Results.BadRequest(validationResults.Select(vr => vr.ErrorMessage));
 
-    await service.AddAsync(u);
-    return Results.Ok($"User '{u.Nome}' criado com sucesso. ID: {u.Id}");
+    try
+    {
+        await service.AddAsync(u);
+        return Results.Ok(u); // devolve o user criado como JSON
+    }
+    catch (DbUpdateException dbEx)
+    {
+        if (dbEx.InnerException != null && dbEx.InnerException.Message.Contains("IX_Users_Email"))
+        {
+            return Results.BadRequest("Erro: email já existe.");
+        }
+        if (dbEx.InnerException != null && dbEx.InnerException.Message.Contains("IX_Users_Telefone"))
+        {
+            return Results.BadRequest("Erro: telefone já existe.");
+        }
+
+        return Results.Problem(detail: "Erro inesperado ao criar user.", statusCode: 500);
+    }
 });
 
 // -----------------------------
