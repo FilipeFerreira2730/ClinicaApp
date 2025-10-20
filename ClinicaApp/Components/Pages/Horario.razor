@@ -1,0 +1,311 @@
+﻿@page "/Horario"
+@using ClinicaApp.Data
+@using ClinicaApp.DTO
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject ProtectedSessionStorage SessionStorage
+@inject IJSRuntime JsRuntime
+
+@rendermode InteractiveServer
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Gestão de Horários</h3>
+    <button class="btn btn-outline-danger" @onclick="Logout">Sair</button>
+</div>
+
+@if (isLoadingInitial)
+{
+    <div class="alert alert-info">
+        <span class="spinner-border spinner-border-sm" role="status"></span> A carregar...
+    </div>
+}
+else if (usuarioLogado == null)
+{
+    <div class="alert alert-warning">Utilizador não autenticado. A redirecionar...</div>
+}
+else if (usuarioLogado.RoleId != 1)
+{
+    <div class="alert alert-danger">Acesso negado. Apenas administradores podem gerir horários.</div>
+}
+else
+{
+    <!-- Formulário -->
+    <div class="card mb-4 formulario-rosa"
+         style="background-color: #f5d1d3 !important; border: none !important; border-radius: 12px !important;
+                            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;">
+        <div class="card-body" style="background-color: #f5d1d3 !important; padding: 25px !important;">
+            <h4>@(editingHorarioId.HasValue ? "Editar Horário" : "Criar Novo Horário")</h4>
+
+            <div class="row mb-3">
+                <div class="col-md-5 form-group-rosa">
+                    <label class="form-label">Hora de Início</label>
+                    <input type="time" class="form-control" @bind="horaInicioDt" />
+                </div>
+                <div class="col-md-5 form-group-rosa">
+                    <label class="form-label">Hora de Fim</label>
+                    <input type="time" class="form-control" @bind="horaFimDt" />
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                <button class="btn btn-success" @onclick="SalvarHorario">
+                    @(editingHorarioId.HasValue ? "Guardar Alterações" : "Adicionar Horário")
+                </button>
+                <button class="btn btn-secondary" @onclick="CancelarEdicao" disabled="@(editingHorarioId == null)">Cancelar</button>
+            </div>
+
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <div class="alert alert-success mt-3">@successMessage</div>
+            }
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger mt-3">@errorMessage</div>
+            }
+        </div>
+    </div>
+
+    <!-- Lista -->
+    <h4>Lista de Horários</h4>
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Hora de Início</th>
+                    <th>Hora de Fim</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!horarios.Any())
+                {
+                    <tr><td colspan="3" class="text-center text-muted">Não existem horários registados.</td></tr>
+                }
+                else
+                {
+                    @foreach (var h in horarios)
+                    {
+                        <tr>
+                            <td>@h.HoraInicio.ToString(@"hh\:mm")</td>
+                            <td>@h.HoraFim.ToString(@"hh\:mm")</td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => EditarHorario(h)">Editar</button>
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoverHorario(h.Id)">Remover</button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private UserDto? usuarioLogado;
+    private List<HorarioDto> horarios = new();
+    private bool isLoadingInitial = true;
+
+    private DateTime horaInicioDt;
+    private DateTime horaFimDt;
+
+    private int? editingHorarioId = null;
+
+    private string successMessage = string.Empty;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        var result = await SessionStorage.GetAsync<UserDto>("usuarioLogado");
+        if (!result.Success || result.Value == null)
+        {
+            Navigation.NavigateTo("/", forceLoad: true);
+            return;
+        }
+
+        usuarioLogado = result.Value;
+
+        if (usuarioLogado.RoleId == 1)
+        {
+            await LoadHorarios();
+        }
+
+        isLoadingInitial = false;
+        StateHasChanged();
+    }
+
+    private async Task LoadHorarios()
+    {
+        try
+        {
+            horarios = await Http.GetFromJsonAsync<List<HorarioDto>>("horarios") ?? new List<HorarioDto>();
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorMessage($"Erro ao carregar horários: {ex.Message}");
+        }
+    }
+
+    private void EditarHorario(HorarioDto h)
+    {
+        editingHorarioId = h.Id;
+        horaInicioDt = DateTime.Today.Add(h.HoraInicio);
+        horaFimDt = DateTime.Today.Add(h.HoraFim);
+        successMessage = string.Empty;
+        errorMessage = string.Empty;
+    }
+
+    private void CancelarEdicao()
+    {
+        editingHorarioId = null;
+        horaInicioDt = default;
+        horaFimDt = default;
+        successMessage = string.Empty;
+        errorMessage = string.Empty;
+    }
+
+    private async Task SalvarHorario()
+    {
+        successMessage = string.Empty;
+        errorMessage = string.Empty;
+
+        if (horaInicioDt == default || horaFimDt == default)
+        {
+            await ShowErrorMessage("As horas de início e fim são obrigatórias.");
+            return;
+        }
+
+        var horaInicioTs = horaInicioDt.TimeOfDay;
+        var horaFimTs = horaFimDt.TimeOfDay;
+
+        if (horaFimTs <= horaInicioTs)
+        {
+            await ShowErrorMessage("A hora de fim deve ser posterior à de início.");
+            return;
+        }
+
+        // Verificar se já existe um horário com as mesmas horas
+        var horarioExistente = horarios.FirstOrDefault(h =>
+            h.HoraInicio == horaInicioTs &&
+            h.HoraFim == horaFimTs &&
+            h.Id != editingHorarioId);
+
+        if (horarioExistente != null)
+        {
+            await ShowErrorMessage($"Já existe um horário com o mesmo intervalo: {horaInicioTs:hh\\:mm} - {horaFimTs:hh\\:mm}");
+            return;
+        }
+
+        // Verificar se o novo horário sobrepõe algum existente
+        var horarioSobreposto = horarios.FirstOrDefault(h =>
+            h.Id != editingHorarioId &&
+            ((horaInicioTs >= h.HoraInicio && horaInicioTs < h.HoraFim) ||
+             (horaFimTs > h.HoraInicio && horaFimTs <= h.HoraFim) ||
+             (horaInicioTs <= h.HoraInicio && horaFimTs >= h.HoraFim)));
+
+        if (horarioSobreposto != null)
+        {
+            await ShowErrorMessage($"Este horário sobrepõe-se com um existente: {horarioSobreposto.HoraInicio:hh\\:mm} - {horarioSobreposto.HoraFim:hh\\:mm}");
+            return;
+        }
+
+        try
+        {
+            var dto = new HorarioDto
+            {
+                HoraInicio = horaInicioTs,
+                HoraFim = horaFimTs
+            };
+
+            HttpResponseMessage resp = editingHorarioId.HasValue
+                ? await Http.PutAsJsonAsync($"horarios/{editingHorarioId.Value}", dto)
+                : await Http.PostAsJsonAsync("horarios", dto);
+
+            if (!resp.IsSuccessStatusCode)
+            {
+                var errorBody = await resp.Content.ReadAsStringAsync();
+                await ShowErrorMessage(errorBody);
+                return;
+            }
+
+            await ShowSuccessMessage(editingHorarioId.HasValue
+                ? "Horário editado com sucesso!"
+                : "Horário criado com sucesso!");
+
+            await LoadHorarios();
+
+            // Reseta o formulário sem limpar as mensagens (já são geridas pelo timer)
+            editingHorarioId = null;
+            horaInicioDt = default;
+            horaFimDt = default;
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorMessage($"Erro ao salvar horário: {ex.Message}");
+        }
+    }
+
+    private async Task RemoverHorario(int horarioId)
+    {
+        var confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Tem a certeza que deseja remover este horário?");
+        if (!confirm) return;
+
+        try
+        {
+            var resp = await Http.DeleteAsync($"horarios/{horarioId}");
+            if (!resp.IsSuccessStatusCode)
+            {
+                var errorBody = await resp.Content.ReadAsStringAsync();
+                await ShowErrorMessage(errorBody);
+                return;
+            }
+            await ShowSuccessMessage("Horário removido com sucesso!");
+            await LoadHorarios();
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorMessage($"Erro ao remover horário: {ex.Message}");
+        }
+    }
+
+    private async Task ShowSuccessMessage(string message)
+    {
+        successMessage = message;
+        errorMessage = string.Empty;
+        StateHasChanged();
+
+        // Desaparece após 3 segundos
+        await Task.Delay(3000);
+        successMessage = string.Empty;
+        StateHasChanged();
+    }
+
+    private async Task ShowErrorMessage(string message)
+    {
+        errorMessage = message;
+        successMessage = string.Empty;
+        StateHasChanged();
+
+        // Desaparece após 5 segundos (erros ficam mais tempo)
+        await Task.Delay(5000);
+        errorMessage = string.Empty;
+        StateHasChanged();
+    }
+
+    private void ClearMessages()
+    {
+        successMessage = string.Empty;
+        errorMessage = string.Empty;
+        StateHasChanged();
+    }
+
+    private async Task Logout()
+    {
+        await SessionStorage.DeleteAsync("usuarioLogado");
+        Navigation.NavigateTo("/", forceLoad: true);
+    }
+}

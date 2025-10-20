@@ -1,80 +1,109 @@
+/* SOLUÇÃO NUCLEAR - FORÇAR ROSA EM TUDO */
+html, body {
+    background-color: #f8dadb !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 100%;
+}
+
 .page {
     position: relative;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    height: 100vh;
+    background-color: #f8dadb !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
-main {
-    flex: 1;
+/* SIDEBAR */
+nav.sidebar {
+    width: 250px;
+    background: linear-gradient(180deg, #ec9d9e 0%, #f0b0b1 100%);
 }
 
-.sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
-}
+    nav.sidebar .sidebar.p-3 {
+        background: transparent !important;
+        height: 100% !important;
+        color: white !important;
+    }
 
-.top-row {
-    background-color: #f7f7f7;
-    border-bottom: 1px solid #d6d5d5;
-    justify-content: flex-end;
-    height: 3.5rem;
-    display: flex;
-    align-items: center;
-}
+    nav.sidebar h4 {
+        color: white !important;
+        font-weight: bold;
+    }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        white-space: nowrap;
-        margin-left: 1.5rem;
+    nav.sidebar .nav-link {
+        color: white !important;
+        background-color: transparent !important;
+        border: none !important;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        transition: background 0.3s ease;
         text-decoration: none;
     }
 
-    .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
-        text-decoration: underline;
+        nav.sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.2) !important;
+        }
+
+        nav.sidebar .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.3) !important;
+            font-weight: bold;
+        }
+
+    nav.sidebar .bi {
+        color: white !important;
+        margin-right: 0.5rem;
+        font-size: 1.1rem;
     }
 
-    .top-row ::deep a:first-child {
-        overflow: hidden;
-        text-overflow: ellipsis;
+    nav.sidebar .nav-item {
+        width: 100%;
     }
 
-@media (max-width: 640.98px) {
-    .top-row {
-        justify-content: space-between;
-    }
-
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        margin-left: 0;
-    }
+/* CONTEÚDO PRINCIPAL - ROSA TOTAL */
+main {
+    flex: 1;
+    overflow-y: auto;
+    background-color: #f8dadb !important;
+    min-height: 100vh;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
-@media (min-width: 641px) {
-    .page {
-        flex-direction: row;
-    }
-
-    .sidebar {
-        width: 250px;
-        height: 100vh;
-        position: sticky;
-        top: 0;
-    }
-
-    .top-row {
-        position: sticky;
-        top: 0;
-        z-index: 1;
-    }
-
-    .top-row.auth ::deep a:first-child {
-        flex: 1;
-        text-align: right;
-        width: 0;
-    }
-
-    .top-row, article {
-        padding-left: 2rem !important;
-        padding-right: 1.5rem !important;
-    }
+/* ARTICLE - REMOVER TODOS OS ESPAÇOS BRANCOS */
+article.content {
+    background-color: #f8dadb !important;
+    min-height: 100vh;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100%;
 }
+
+/* TOP-ROW */
+.top-row {
+    height: 3.5rem;
+    background: linear-gradient(90deg, #ec9d9e 0%, #f0b0b1 100%) !important;
+    color: white !important;
+    border-bottom: none !important;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+    .top-row a,
+    .top-row .btn-link {
+        color: white !important;
+        text-decoration: none;
+    }
+
+        .top-row a:hover,
+        .top-row .btn-link:hover {
+            text-decoration: underline;
+        }
 
 #blazor-error-ui {
     background: lightyellow;
@@ -94,3 +123,15 @@ main {
         right: 0.75rem;
         top: 0.5rem;
     }
+
+/* GARANTIR QUE TODOS OS ELEMENTOS DENTRO SEJAM ROSA */
+.page * {
+    background-color: #f8dadb !important;
+}
+
+/* REMOVER QUALQUER PADDING/MARGIN RESIDUAL */
+body > div,
+body > main,
+body > article {
+    background-color: #f8dadb !important;
+}

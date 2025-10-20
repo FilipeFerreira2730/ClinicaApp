@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ClinicaApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250904112657_MakeUserPasswordNullable")]
-    partial class MakeUserPasswordNullable
+    [Migration("20250916155314_AddPasswordResetFieldsToUser")]
+    partial class AddPasswordResetFieldsToUser
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -162,6 +162,12 @@ namespace ClinicaApp.Migrations
 
                     b.Property<byte[]>("PasswordHash")
                         .HasColumnType("varbinary(max)");
+
+                    b.Property<DateTime?>("PasswordResetExpires")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PasswordResetToken")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("PasswordSalt")
                         .HasColumnType("varbinary(max)");

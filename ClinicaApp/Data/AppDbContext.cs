@@ -12,6 +12,9 @@ namespace ClinicaApp.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
 
+        // 👇 Adiciona esta linha para incluir os horários
+        public DbSet<Horario> Horarios { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -57,6 +60,16 @@ namespace ClinicaApp.Data
                  .OnDelete(DeleteBehavior.Restrict);
 
                 e.HasIndex(r => new { r.SalaId, r.DataHoraInicio, r.DataHoraFim });
+            });
+
+            // Horário
+            modelBuilder.Entity<Horario>(e =>
+            {
+                e.Property(h => h.HoraInicio).IsRequired();
+                e.Property(h => h.HoraFim).IsRequired();
+
+                // (opcional) Garante que não há horários duplicados
+                e.HasIndex(h => new { h.HoraInicio, h.HoraFim }).IsUnique();
             });
 
             // Role

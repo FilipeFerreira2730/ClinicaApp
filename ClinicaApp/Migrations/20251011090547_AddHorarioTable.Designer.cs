@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ClinicaApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250901143609_AddUsersAndRoles")]
-    partial class AddUsersAndRoles
+    [Migration("20251011090547_AddHorarioTable")]
+    partial class AddHorarioTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace ClinicaApp.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ClinicaApp.Data.Profissional", b =>
+            modelBuilder.Entity("ClinicaApp.Data.Horario", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -33,29 +33,18 @@ namespace ClinicaApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                    b.Property<TimeSpan>("HoraFim")
+                        .HasColumnType("time");
 
-                    b.Property<string>("Especialidade")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("Telefone")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<TimeSpan>("HoraInicio")
+                        .HasColumnType("time");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Profissionais");
+                    b.HasIndex("HoraInicio", "HoraFim")
+                        .IsUnique();
+
+                    b.ToTable("Horarios");
                 });
 
             modelBuilder.Entity("ClinicaApp.Data.Role", b =>
@@ -77,6 +66,23 @@ namespace ClinicaApp.Migrations
                         .IsUnique();
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Nome = "Admin"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Nome = "UserManager"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Nome = "User"
+                        });
                 });
 
             modelBuilder.Entity("ClinicaApp.Data.Sala", b =>
@@ -100,7 +106,7 @@ namespace ClinicaApp.Migrations
                     b.ToTable("Salas");
                 });
 
-            modelBuilder.Entity("ClinicaApp.Data.User", b =>
+            modelBuilder.Entity("Profissional", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -108,35 +114,20 @@ namespace ClinicaApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Email")
+                    b.Property<string>("Especialidade")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<byte[]>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<byte[]>("PasswordSalt")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<int>("RoleId")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
+                    b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("Users");
+                    b.ToTable("Profissionais");
                 });
 
             modelBuilder.Entity("Reserva", b =>
@@ -173,20 +164,68 @@ namespace ClinicaApp.Migrations
                     b.ToTable("Reservas");
                 });
 
-            modelBuilder.Entity("ClinicaApp.Data.User", b =>
+            modelBuilder.Entity("User", b =>
                 {
-                    b.HasOne("ClinicaApp.Data.Role", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<byte[]>("PasswordHash")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<DateTime?>("PasswordResetExpires")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PasswordResetToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("PasswordSalt")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Telefone")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Profissional", b =>
+                {
+                    b.HasOne("User", "User")
+                        .WithOne("Profissional")
+                        .HasForeignKey("Profissional", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Role");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Reserva", b =>
                 {
-                    b.HasOne("ClinicaApp.Data.Profissional", "Profissional")
+                    b.HasOne("Profissional", "Profissional")
                         .WithMany()
                         .HasForeignKey("ProfissionalId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -198,10 +237,10 @@ namespace ClinicaApp.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("ClinicaApp.Data.User", "User")
+                    b.HasOne("User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Profissional");
@@ -209,6 +248,22 @@ namespace ClinicaApp.Migrations
                     b.Navigation("Sala");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("User", b =>
+                {
+                    b.HasOne("ClinicaApp.Data.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("User", b =>
+                {
+                    b.Navigation("Profissional");
                 });
 #pragma warning restore 612, 618
         }

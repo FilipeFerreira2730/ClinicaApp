@@ -17,4 +17,8 @@ public class User
 
     // Navegação para Profissional, se for RoleId=2
     public Profissional? Profissional { get; set; }
+
+    // 🔑 Campos para reset de password
+    public string? PasswordResetToken { get; set; }
+    public DateTime? PasswordResetExpires { get; set; }
 }
