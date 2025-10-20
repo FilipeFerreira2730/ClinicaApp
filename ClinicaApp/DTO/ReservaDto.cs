@@ -14,6 +14,8 @@
 
         public int UserId { get; set; }
         public string UserNome { get; set; }
+
+        public string Mensagem { get; set; }
     }
 
 }

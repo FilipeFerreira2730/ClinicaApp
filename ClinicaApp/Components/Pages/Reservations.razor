@@ -1,0 +1,562 @@
+﻿@page "/Reservations"
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using ClinicaApp.DTO
+@using ClinicaApp.Data
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject ProtectedSessionStorage SessionStorage
+@inject IJSRuntime JsRuntime
+
+@rendermode InteractiveServer
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Gestão de Reservas</h3>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary" @onclick="GoToMyReservations">Minhas Reservas</button>
+        <button class="btn btn-outline-danger" @onclick="Logout">Sair</button>
+    </div>
+</div>
+
+@if (isLoadingInitial)
+{
+    <div class="alert alert-info">
+        <span class="spinner-border spinner-border-sm" role="status"></span> A carregar...
+    </div>
+}
+else if (usuarioLogado == null)
+{
+    <div class="alert alert-warning">Utilizador não autenticado. A redirecionar para login...</div>
+}
+else
+{
+    <!-- Formulário -->
+    <div class="card mb-4 formulario-rosa"
+         style="background-color: #f5d1d3 !important; border: none !important; border-radius: 12px !important;
+                                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;">
+        <div class="card-body" style="background-color: #f5d1d3 !important; padding: 25px !important;">
+            <h4>@(reservaEmEdicao != null ? "Editar Reserva" : "Criar Nova Reserva")</h4>
+
+            <!-- Sala -->
+            <div class="mb-3 form-group-rosa">
+                <label class="form-label">Sala</label>
+                <select class="form-select" @bind="SelectedSalaId" @bind:event="onchange">
+                    <option value="0">-- Selecionar Sala --</option>
+                    @if (salas != null)
+                    {
+                        @foreach (var sala in salas)
+                        {
+                            <option value="@sala.Id">@sala.Nome</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <!-- Data -->
+            <div class="mb-3 form-group-rosa">
+                <label class="form-label">Dia</label>
+                <input type="date" class="form-control" @bind="selectedDate" @bind:event="onchange" />
+            </div>
+
+            <!-- Profissional (apenas admin vê) -->
+            @if (usuarioLogado.RoleId == 1)
+            {
+                <div class="mb-3 form-group-rosa">
+                    <label class="form-label">Profissional</label>
+                    <select class="form-select" @bind="selectedProfissionalId">
+                        <option value="0">-- Selecionar Profissional --</option>
+                        @if (profissionais != null)
+                        {
+                            @foreach (var p in profissionais)
+                            {
+                                <option value="@p.Id">@($"{p.UserNome} {(string.IsNullOrWhiteSpace(p.Especialidade) ? "" : $" - {p.Especialidade}")}")</option>
+                            }
+                        }
+                    </select>
+                </div>
+            }
+
+            <!-- Horários disponíveis -->
+            @if (availableTimes != null && availableTimes.Any() && SelectedSalaId != 0)
+            {
+                <div class="mb-3 form-group-rosa">
+                    <label class="form-label">Horários Disponíveis (@selectedDate.ToString("dd/MM/yyyy"))</label>
+                    <div class="d-flex flex-wrap">
+                        @foreach (var kv in availableTimes)
+                        {
+                            var slotKey = kv.Key;
+                            var isFree = kv.Value;
+                            var isSelected = selectedTimeSlots.Contains(slotKey);
+                            var dotClass = isFree ? (isSelected ? "bg-primary" : "bg-success") : "bg-danger";
+                            var containerClass = isSelected ? "border-primary" : "border-secondary";
+
+                            <div class="d-flex align-items-center border rounded px-3 py-2 m-1 @containerClass"
+                                 style="cursor:@(isFree ? "pointer" : "not-allowed"); min-width:180px;"
+                                 @onclick="() => ToggleTimeSlot(slotKey, isFree)">
+                                <div class="rounded-circle @dotClass" style="width:14px; height:14px; margin-right:12px;"></div>
+                                <div>@slotKey</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- ✅ Campo: Mensagem -->
+            <div class="mb-3 form-group-rosa">
+                <label class="form-label">Observação (opcional)</label>
+                <textarea class="form-control" @bind="mensagem" rows="3"
+                          placeholder="Ex: Só vou usar a sala por 1 hora, ou Ocorreu um problema na sala..."></textarea>
+                <small class="form-text text-muted">Máximo 500 caracteres</small>
+            </div>
+
+            <!-- Botões -->
+            <div class="mt-3 d-flex flex-wrap gap-2">
+                <button class="btn btn-primary" @onclick="Reservar" disabled="@(!CanReserve)">
+                    @(reservaEmEdicao != null ? "Atualizar" : "Reservar")
+                </button>
+
+                <button class="btn btn-success" @onclick="ReservarAnualmente" disabled="@(!CanReserve)">
+                    Reservar Anualmente
+                </button>
+                @if (reservaEmEdicao != null)
+                {
+                    <button class="btn btn-secondary" @onclick="CancelarEdicao">Cancelar</button>
+                }
+            </div>
+
+            <!-- Mensagens -->
+            <div class="mt-3">
+                @if (!string.IsNullOrEmpty(successMessage))
+                {
+                    <div class="alert alert-success">@successMessage</div>
+                }
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger">@errorMessage</div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Reservas -->
+    <h4>Reservas Existentes</h4>
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Sala</th>
+                    <th>Profissional</th>
+                    <th>Início</th>
+                    <th>Fim</th>
+                    <th>Observação</th>
+                    @if (usuarioLogado.RoleId == 1)
+                    {
+                        <th>Ações</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @if (reservas == null)
+                {
+                    <tr><td colspan="6" class="text-center">A carregar...</td></tr>
+                }
+                else if (!reservas.Any())
+                {
+                    <tr><td colspan="6" class="text-center text-muted">Não existem reservas.</td></tr>
+                }
+                else
+                {
+                    @foreach (var r in reservas.OrderBy(r => r.DataHoraInicio))
+                    {
+                        <tr>
+                            <td>@r.SalaNome</td>
+                            <td>@r.ProfissionalNome</td>
+                            <td>@r.DataHoraInicio.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@r.DataHoraFim.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(r.Mensagem))
+                                {
+                                    <div>
+                                        <button class="btn btn-sm btn-info mb-1"
+                                                @onclick="() => ToggleMensagem(r.Id)"
+                                                title="Ver mensagem">
+                                            📝
+                                        </button>
+                                        @if (mensagemVisivel == r.Id)
+                                        {
+                                            <div class="alert alert-info p-2 mt-1 small" style="max-width: 300px;">
+                                                @r.Mensagem
+                                                <button class="btn btn-sm btn-close float-end p-0"
+                                                        @onclick="() => FecharMensagem()"
+                                                        style="font-size: 0.7rem;"></button>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            @if (usuarioLogado.RoleId == 1)
+                            {
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => EditarReserva(r)">Editar</button>
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoverReserva(r.Id)">Remover</button>
+                                </td>
+                            }
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private UserDto? usuarioLogado;
+    private List<Sala>? salas;
+    private List<ProfissionalDto>? profissionais;
+    private List<ReservaDto>? reservas;
+    private List<HorarioDto> horarios = new();
+
+    private ReservaDto? reservaEmEdicao = null;
+    private int _selectedSalaId;
+    private int SelectedSalaId
+    {
+        get => _selectedSalaId;
+        set
+        {
+            if (_selectedSalaId != value)
+            {
+                _selectedSalaId = value;
+                _ = InvokeAsync(LoadAvailableTimes);
+            }
+        }
+    }
+
+    private int selectedProfissionalId = 0;
+    private DateTime selectedDate = DateTime.Today;
+    private Dictionary<string, bool> availableTimes = new();
+    private List<string> selectedTimeSlots = new();
+    private string mensagem = string.Empty;
+    private int? mensagemVisivel = null; // ✅ Controla qual mensagem está visível
+
+    private bool isLoadingInitial = true;
+    private string successMessage = string.Empty;
+    private string errorMessage = string.Empty;
+
+    private bool CanReserve =>
+        SelectedSalaId != 0 &&
+        selectedTimeSlots.Any() &&
+        usuarioLogado != null &&
+        (usuarioLogado.RoleId != 1 || selectedProfissionalId != 0);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        var result = await SessionStorage.GetAsync<UserDto>("usuarioLogado");
+        if (!result.Success || result.Value == null)
+        {
+            Navigation.NavigateTo("/", forceLoad: true);
+            return;
+        }
+
+        usuarioLogado = result.Value;
+        await LoadData();
+
+        if (usuarioLogado.RoleId == 2 && profissionais != null)
+        {
+            var prof = profissionais.FirstOrDefault(p => p.UserId == usuarioLogado.Id);
+            if (prof != null) selectedProfissionalId = prof.Id;
+        }
+
+        isLoadingInitial = false;
+        StateHasChanged();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            salas = await Http.GetFromJsonAsync<List<Sala>>("salas");
+            profissionais = await Http.GetFromJsonAsync<List<ProfissionalDto>>("profissionais");
+            reservas = await Http.GetFromJsonAsync<List<ReservaDto>>("reservas");
+            horarios = await Http.GetFromJsonAsync<List<HorarioDto>>("horarios");
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorMessage($"Erro ao carregar dados: {ex.Message}");
+        }
+    }
+
+    private async Task LoadAvailableTimes()
+    {
+        availableTimes.Clear();
+        selectedTimeSlots.Clear();
+
+        if (SelectedSalaId == 0 || reservas == null || horarios == null)
+        {
+            StateHasChanged();
+            return;
+        }
+
+        var reservasSala = reservas
+            .Where(r => r.SalaId == SelectedSalaId && r.DataHoraInicio.Date == selectedDate.Date)
+            .ToList();
+
+        foreach (var h in horarios)
+        {
+            var start = selectedDate.Date.Add(h.HoraInicio);
+            var end = selectedDate.Date.Add(h.HoraFim);
+
+            bool ocupado = reservasSala.Any(r => r.DataHoraInicio < end && r.DataHoraFim > start);
+            var key = $"{start:HH:mm} - {end:HH:mm}";
+            availableTimes[key] = !ocupado;
+        }
+
+        StateHasChanged();
+    }
+
+    private void ToggleTimeSlot(string slotKey, bool isFree)
+    {
+        if (!isFree) return;
+        selectedTimeSlots.Clear();
+        selectedTimeSlots.Add(slotKey);
+    }
+
+    // ✅ NOVO MÉTODO: Mostrar/ocultar mensagem
+    private void ToggleMensagem(int reservaId)
+    {
+        if (mensagemVisivel == reservaId)
+        {
+            mensagemVisivel = null;
+        }
+        else
+        {
+            mensagemVisivel = reservaId;
+        }
+        StateHasChanged();
+    }
+
+    // ✅ NOVO MÉTODO: Fechar mensagem
+    private void FecharMensagem()
+    {
+        mensagemVisivel = null;
+        StateHasChanged();
+    }
+
+    private void EditarReserva(ReservaDto r)
+    {
+        reservaEmEdicao = r;
+        SelectedSalaId = r.SalaId;
+        selectedDate = r.DataHoraInicio.Date;
+        selectedTimeSlots.Clear();
+        selectedTimeSlots.Add($"{r.DataHoraInicio:HH:mm} - {r.DataHoraFim:HH:mm}");
+        selectedProfissionalId = r.ProfissionalId;
+        mensagem = r.Mensagem ?? string.Empty;
+        mensagemVisivel = null; // ✅ Fecha mensagens abertas
+    }
+
+    // ✅ NOVO MÉTODO: Cancelar edição
+    private void CancelarEdicao()
+    {
+        reservaEmEdicao = null;
+        mensagem = string.Empty;
+        mensagemVisivel = null;
+        ClearMessages();
+        StateHasChanged();
+    }
+
+    private async Task RemoverReserva(int reservaId)
+    {
+        var confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Tem a certeza que deseja remover esta reserva?");
+        if (!confirm) return;
+
+        var resp = await Http.DeleteAsync($"reservas/{reservaId}");
+        if (resp.IsSuccessStatusCode)
+        {
+            await ShowSuccessMessage("Reserva removida com sucesso!");
+            mensagemVisivel = null; // ✅ Fecha mensagens abertas
+            await RefreshAfterAction();
+        }
+        else
+        {
+            var body = await resp.Content.ReadAsStringAsync();
+            await ShowErrorMessage($"Erro ao remover: {body}");
+        }
+    }
+
+    private async Task Reservar()
+    {
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+
+        if (reservaEmEdicao != null)
+        {
+            // ✅ EDIÇÃO DE RESERVA
+            var r = reservaEmEdicao;
+            var partes = selectedTimeSlots.First().Split(" - ");
+            var inicioTime = TimeSpan.Parse(partes[0]);
+            var fimTime = TimeSpan.Parse(partes[1]);
+
+            var dto = new
+            {
+                Id = r.Id,
+                SalaId = SelectedSalaId,
+                ProfissionalId = usuarioLogado!.RoleId == 1 ? selectedProfissionalId : r.ProfissionalId,
+                DataHoraInicio = selectedDate.Date.Add(inicioTime),
+                DataHoraFim = selectedDate.Date.Add(fimTime),
+                UserId = r.UserId,
+                Mensagem = mensagem // ✅ Inclui a mensagem
+            };
+
+            Console.WriteLine($"DEBUG - Editando reserva. Mensagem: '{mensagem}'");
+
+            var resp = await Http.PutAsJsonAsync($"reservas/{r.Id}", dto);
+            if (resp.IsSuccessStatusCode)
+            {
+                await ShowSuccessMessage("Reserva editada com sucesso!");
+                await RefreshAfterAction();
+            }
+            else
+            {
+                var body = await resp.Content.ReadAsStringAsync();
+                await ShowErrorMessage($"Erro ao editar: {body}");
+                Console.WriteLine($"DEBUG - Erro na API: {body}");
+            }
+        }
+        else
+        {
+            // ✅ CRIAÇÃO DE RESERVA
+            await CriarReservasParaDatas(new List<DateTime> { selectedDate });
+        }
+    }
+
+    private async Task ReservarAnualmente()
+    {
+        var datas = Enumerable.Range(0, 52)
+                              .Select(i => selectedDate.AddDays(i * 7))
+                              .ToList();
+
+        await CriarReservasParaDatas(datas);
+    }
+
+    private async Task CriarReservasParaDatas(List<DateTime> datas)
+    {
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+
+        int profissionalIdToUse;
+        if (usuarioLogado!.RoleId == 1)
+            profissionalIdToUse = selectedProfissionalId;
+        else
+        {
+            var prof = profissionais?.FirstOrDefault(p => p.UserId == usuarioLogado.Id);
+            if (prof == null)
+            {
+                await ShowErrorMessage("Não foi possível determinar o profissional associado.");
+                return;
+            }
+            profissionalIdToUse = prof.Id;
+        }
+
+        try
+        {
+            foreach (var dia in datas)
+            {
+                foreach (var slot in selectedTimeSlots)
+                {
+                    var partes = slot.Split(" - ");
+                    var inicioTime = TimeSpan.Parse(partes[0]);
+                    var fimTime = TimeSpan.Parse(partes[1]);
+
+                    var dto = new
+                    {
+                        SalaId = SelectedSalaId,
+                        ProfissionalId = profissionalIdToUse,
+                        DataHoraInicio = dia.Date.Add(inicioTime),
+                        DataHoraFim = dia.Date.Add(fimTime),
+                        UserId = usuarioLogado.Id,
+                        Mensagem = mensagem // ✅ Inclui a mensagem
+                    };
+
+                    Console.WriteLine($"DEBUG - Criando reserva. Mensagem: '{mensagem}'");
+
+                    var resp = await Http.PostAsJsonAsync("reservas", dto);
+                    if (!resp.IsSuccessStatusCode)
+                    {
+                        var body = await resp.Content.ReadAsStringAsync();
+                        await ShowErrorMessage($"{body}");
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(errorMessage))
+                await ShowSuccessMessage(datas.Count > 1 ? "Reservas anuais criadas com sucesso!" : "Reserva criada com sucesso!");
+
+            await RefreshAfterAction();
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorMessage($"Erro inesperado: {ex.Message}");
+            Console.WriteLine($"DEBUG - Exceção: {ex.Message}");
+        }
+    }
+
+    private async Task RefreshAfterAction()
+    {
+        reservaEmEdicao = null;
+        selectedTimeSlots.Clear();
+        selectedProfissionalId = 0;
+        SelectedSalaId = 0;
+        selectedDate = DateTime.Today;
+        mensagem = string.Empty;
+        mensagemVisivel = null; // ✅ Fecha mensagens abertas
+
+        // Recarrega os dados
+        await LoadData();
+        StateHasChanged();
+    }
+
+    private async Task ShowSuccessMessage(string message)
+    {
+        successMessage = message;
+        errorMessage = string.Empty;
+        StateHasChanged();
+
+        await Task.Delay(3000);
+        successMessage = string.Empty;
+        StateHasChanged();
+    }
+
+    private async Task ShowErrorMessage(string message)
+    {
+        errorMessage = message;
+        successMessage = string.Empty;
+        StateHasChanged();
+
+        await Task.Delay(5000);
+        errorMessage = string.Empty;
+        StateHasChanged();
+    }
+
+    private void ClearMessages()
+    {
+        successMessage = string.Empty;
+        errorMessage = string.Empty;
+        StateHasChanged();
+    }
+
+    private async Task Logout()
+    {
+        await SessionStorage.DeleteAsync("usuarioLogado");
+        Navigation.NavigateTo("/", forceLoad: true);
+    }
+
+    private void GoToMyReservations()
+    {
+        Navigation.NavigateTo("/MyReservations");
+    }
+}

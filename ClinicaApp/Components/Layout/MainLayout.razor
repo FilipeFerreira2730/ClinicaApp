@@ -1,16 +1,36 @@
 ﻿@inherits LayoutComponentBase
 
+<style>
+    /* SOLUÇÃO DEFINITIVA - CSS INLINE PARA SOBRESCREVER TUDO */
+    :root {
+        --bs-body-bg: #f8dadb !important;
+    }
+
+    body {
+        background-color: #f8dadb !important;
+        --bs-body-bg: #f8dadb !important;
+    }
+
+    html, body, main, article, .page, .content {
+        background-color: #f8dadb !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .content {
+        padding-top: 0 !important;
+    }
+</style>
+
 <div class="page">
-    <div class="sidebar">
+    <!-- Sidebar -->
+    <nav class="sidebar" aria-label="Menu de navegação principal">
         <NavMenu />
-    </div>
+    </nav>
 
+    <!-- Conteúdo principal -->
     <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
+        <article class="content">
             @Body
         </article>
     </main>

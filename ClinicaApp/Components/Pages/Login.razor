@@ -1,0 +1,209 @@
+﻿@page "/"
+@using ClinicaApp.DTO
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject ProtectedSessionStorage SessionStorage
+@inject UserStateService UserState
+
+@rendermode InteractiveServer
+
+<style>
+    .login-fullpage {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: #f8dadb;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Container do card responsivo */
+    .login-card {
+        width: 90%;
+        max-width: 400px;
+        margin: 20px;
+        padding: 20px;
+    }
+
+    /* Imagem responsiva */
+    .login-logo {
+        width: 140px;
+        height: 90px;
+        margin-bottom: 20px;
+        object-fit: contain;
+    }
+
+    @@media (min-width: 768px) {
+        .login-card {
+            padding: 30px;
+        }
+
+        .login-logo {
+            width: 180px;
+            height: 120px;
+            margin-bottom: 25px;
+        }
+    }
+
+    @@media (max-width: 375px) {
+        /* Para telemóveis muito pequenos */
+        .login-logo {
+            width: 120px;
+            height: 80px;
+            margin-bottom: 15px;
+        }
+
+        .login-card {
+            padding: 15px;
+            margin: 15px;
+        }
+    }
+
+    /* Formulário responsivo */
+    .login-form .form-control {
+        font-size: 16px; /* Evita zoom em iOS */
+    }
+
+    /* Botão responsivo */
+    .login-btn {
+        height: 48px;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    @@media (max-width: 576px) {
+        .login-btn {
+            height: 44px;
+            font-size: 1rem;
+        }
+    }
+
+    /* Alertas responsivos */
+    .alert {
+        font-size: 0.9rem;
+        margin-top: 15px;
+    }
+
+    /* Melhorar experiência em mobile */
+    input, button {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        border-radius: 8px;
+    }
+
+    /* Prevenir zoom em inputs em iOS */
+    @@media (max-width: 768px) {
+        input[type="text"],
+        input[type="password"],
+        input[type="email"] {
+            font-size: 16px;
+        }
+    }
+</style>
+
+<div class="login-fullpage">
+    <div class="card shadow login-card">
+        <!-- Imagem responsiva -->
+        <div class="text-center mb-4">
+            <img src="/envolve-te-removebg-preview.png" alt="ENVOLVE-TE" class="login-logo">
+        </div>
+
+        <!-- FORMULÁRIO -->
+        <EditForm Model="@loginModel" OnValidSubmit="HandleLogin" class="login-form">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <InputText class="form-control" @bind-Value="loginModel.Email" />
+                <ValidationMessage For="@(() => loginModel.Email)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <InputText class="form-control" @bind-Value="loginModel.Password" type="password" />
+                <ValidationMessage For="@(() => loginModel.Password)" />
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 login-btn" disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                    <span> A processar...</span>
+                }
+                else
+                {
+                    <span>Login</span>
+                }
+            </button>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger mt-3">@errorMessage</div>
+            }
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private LoginModel loginModel = new();
+    private bool isLoading;
+    private string errorMessage = string.Empty;
+
+    private class LoginModel
+    {
+        [Required(ErrorMessage = "Email é obrigatório")]
+        [EmailAddress(ErrorMessage = "Email inválido")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Password é obrigatória")]
+        public string Password { get; set; } = string.Empty;
+    }
+
+    private async Task HandleLogin()
+    {
+        isLoading = true;
+        errorMessage = string.Empty;
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("auth/login", loginModel);
+            var resultJson = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var user = System.Text.Json.JsonSerializer.Deserialize<UserDto>(resultJson, new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (user != null)
+                {
+                    UserState.SetUsuario(user);
+                    await SessionStorage.SetAsync("usuarioLogado", user);
+                    Navigation.NavigateTo("/MyReservations");
+                }
+            }
+            else
+            {
+                errorMessage = string.IsNullOrWhiteSpace(resultJson) ? "Email ou password inválidos" : resultJson;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erro inesperado: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

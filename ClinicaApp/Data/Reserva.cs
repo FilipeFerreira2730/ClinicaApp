@@ -1,4 +1,5 @@
-﻿using ClinicaApp.Data;
+﻿using System.ComponentModel.DataAnnotations;
+using ClinicaApp.Data;
 
 public class Reserva
 {
@@ -16,4 +17,7 @@ public class Reserva
     // Quem criou a reserva
     public int UserId { get; set; }
     public User User { get; set; }
+
+    [MaxLength(500)] // Limite opcional de caracteres
+    public string Mensagem { get; set; }
 }

@@ -22,6 +22,28 @@ namespace ClinicaApp.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ClinicaApp.Data.Horario", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<TimeSpan>("HoraFim")
+                        .HasColumnType("time");
+
+                    b.Property<TimeSpan>("HoraInicio")
+                        .HasColumnType("time");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HoraInicio", "HoraFim")
+                        .IsUnique();
+
+                    b.ToTable("Horarios");
+                });
+
             modelBuilder.Entity("ClinicaApp.Data.Role", b =>
                 {
                     b.Property<int>("Id")
@@ -119,6 +141,11 @@ namespace ClinicaApp.Migrations
                     b.Property<DateTime>("DataHoraInicio")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Mensagem")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<int>("ProfissionalId")
                         .HasColumnType("int");
 
@@ -159,6 +186,12 @@ namespace ClinicaApp.Migrations
 
                     b.Property<byte[]>("PasswordHash")
                         .HasColumnType("varbinary(max)");
+
+                    b.Property<DateTime?>("PasswordResetExpires")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PasswordResetToken")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("PasswordSalt")
                         .HasColumnType("varbinary(max)");

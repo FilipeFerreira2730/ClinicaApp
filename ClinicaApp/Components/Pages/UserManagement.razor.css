@@ -1,0 +1,310 @@
+﻿/* ---------- Layout Geral ---------- */
+.user-management-page {
+    background-color: #f8dadb;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.user-management-container {
+    background-color: transparent !important;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ---------- Cartão do Formulário Rosa COM ALTA ESPECIFICIDADE ---------- */
+.user-management-page .user-management-container .card.mb-4.formulario-rosa,
+.user-management-page .user-management-container .card.mb-4.formulario-rosa .card-body {
+    background-color: #f5d1d3 !important;
+    border-radius: 12px !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ---------- Títulos ---------- */
+h3, h4, .form-label {
+    color: #333 !important;
+}
+
+/* ---------- Tabela com Fundo Rosa Harmonizado ---------- */
+.table-responsive {
+    background-color: #f5d1d3 !important;
+    border-radius: 8px;
+    overflow: auto;
+    padding: 15px;
+}
+
+table.table {
+    width: 100%;
+    min-width: 600px;
+    background-color: transparent !important;
+}
+
+th, td {
+    vertical-align: middle;
+    text-align: center;
+    background-color: transparent !important;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* ---------- Botões com Cores Harmonizadas ---------- */
+.user-management-page .btn-warning,
+.user-management-page .btn-primary,
+.user-management-page .btn-danger,
+.user-management-page .btn-info,
+.user-management-page .btn-success,
+.user-management-page .btn-secondary {
+    background-color: #d4a5a8 !important;
+    border-color: #d4a5a8 !important;
+    color: white !important;
+}
+
+.user-management-page .btn-outline-danger {
+    background-color: transparent !important;
+    border-color: #d4a5a8 !important;
+    color: #d4a5a8 !important;
+}
+
+.user-management-page .btn-warning:hover,
+.user-management-page .btn-primary:hover,
+.user-management-page .btn-danger:hover,
+.user-management-page .btn-info:hover,
+.user-management-page .btn-success:hover,
+.user-management-page .btn-secondary:hover {
+    background-color: #c99598 !important;
+    border-color: #c99598 !important;
+    color: white !important;
+}
+
+.user-management-page .btn-outline-danger:hover {
+    background-color: #d4a5a8 !important;
+    border-color: #d4a5a8 !important;
+    color: white !important;
+}
+
+/* ---------- Botões e Formulário ---------- */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.btn-sm {
+    padding: 4px 10px;
+    font-size: 0.875rem;
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+    .form-control:focus {
+        border-color: #d4a5a8;
+        box-shadow: 0 0 0 0.2rem rgba(212, 165, 168, 0.25);
+    }
+
+/* ---------- Estilos específicos do formulário rosa ---------- */
+.user-management-page .user-management-container .formulario-rosa .form-group-rosa {
+    margin-bottom: 20px;
+}
+
+    .formulario-rosa .form-group-rosa label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .formulario-rosa .form-group-rosa input,
+    .formulario-rosa .form-group-rosa select {
+        width: 100%;
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        background-color: white;
+        font-size: 16px;
+    }
+
+        .formulario-rosa .form-group-rosa input:focus,
+        .formulario-rosa .form-group-rosa select:focus {
+            border-color: #d4a5a8;
+            box-shadow: 0 0 0 0.2rem rgba(212, 165, 168, 0.25);
+            outline: none;
+        }
+
+/* ---------- Alertas ---------- */
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+.alert-success {
+    background-color: #e8f5e8;
+    color: #2d5016;
+    border-left: 4px solid #4caf50;
+}
+
+.alert-danger {
+    background-color: #fde8e8;
+    color: #7f1d1d;
+    border-left: 4px solid #e53e3e;
+}
+
+/* ---------- Loading Spinner ---------- */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-color: #d4a5a8;
+    border-right-color: transparent;
+}
+
+/* ---------- Ajustes para inputs desabilitados ---------- */
+.form-control:disabled {
+    background-color: #f0f0f0;
+    opacity: 0.7;
+}
+
+/* ---------- Responsividade ---------- */
+@media (max-width: 992px) {
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    h3 {
+        font-size: 1.5rem;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    .mb-2 {
+        margin-bottom: 1rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
+
+    table.table th, table.table td {
+        padding: 8px;
+    }
+
+    h4 {
+        font-size: 1.2rem;
+    }
+
+    .user-management-page {
+        padding: 15px;
+    }
+
+    .user-management-container {
+        padding: 0 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    .table-responsive {
+        border-radius: 0;
+        padding: 5px;
+    }
+
+    .table thead {
+        display: none;
+    }
+
+    .table, .table tbody, .table tr, .table td {
+        display: block;
+        width: 100%;
+    }
+
+        .table tr {
+            margin-bottom: 15px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            border: 1px solid #e8c3c5;
+        }
+
+        .table td {
+            text-align: left;
+            padding-left: 50%;
+            position: relative;
+            white-space: normal;
+            border: none;
+            padding-top: 8px;
+            padding-bottom: 8px;
+        }
+
+            .table td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 10px;
+                width: 45%;
+                font-weight: bold;
+                white-space: normal;
+                color: #333;
+            }
+
+            .table td .d-flex {
+                flex-direction: column;
+                gap: 5px;
+                width: 100%;
+                align-items: flex-start;
+            }
+
+            .table td .btn {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+
+    .user-management-page {
+        padding: 10px;
+    }
+
+    .user-management-container {
+        padding: 0 10px;
+    }
+
+    .card-body {
+        padding: 15px;
+    }
+
+    .d-flex.flex-wrap.gap-2 {
+        flex-direction: column;
+    }
+
+        .d-flex.flex-wrap.gap-2 .btn {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+}
+
+/* Melhorias para tablets */
+@media (min-width: 577px) and (max-width: 768px) {
+    .table td .d-flex {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    .table td .btn {
+        width: auto;
+        flex: 1;
+        min-width: 80px;
+    }
+}
+
+/* Melhorias de acessibilidade */
+.btn:focus {
+    box-shadow: 0 0 0 0.2rem rgba(212, 165, 168, 0.5);
+}
+

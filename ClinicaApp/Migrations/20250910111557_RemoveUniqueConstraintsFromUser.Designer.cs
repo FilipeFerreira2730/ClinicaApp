@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ClinicaApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250901160851_AtualizaProfissional")]
-    partial class AtualizaProfissional
+    [Migration("20250910111557_RemoveUniqueConstraintsFromUser")]
+    partial class RemoveUniqueConstraintsFromUser
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -44,6 +44,23 @@ namespace ClinicaApp.Migrations
                         .IsUnique();
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Nome = "Admin"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Nome = "UserManager"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Nome = "User"
+                        });
                 });
 
             modelBuilder.Entity("ClinicaApp.Data.Sala", b =>
@@ -144,11 +161,9 @@ namespace ClinicaApp.Migrations
                         .HasColumnType("nvarchar(150)");
 
                     b.Property<byte[]>("PasswordHash")
-                        .IsRequired()
                         .HasColumnType("varbinary(max)");
 
                     b.Property<byte[]>("PasswordSalt")
-                        .IsRequired()
                         .HasColumnType("varbinary(max)");
 
                     b.Property<int>("RoleId")
@@ -220,8 +235,7 @@ namespace ClinicaApp.Migrations
 
             modelBuilder.Entity("User", b =>
                 {
-                    b.Navigation("Profissional")
-                        .IsRequired();
+                    b.Navigation("Profissional");
                 });
 #pragma warning restore 612, 618
         }
