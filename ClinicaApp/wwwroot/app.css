@@ -1,157 +1,201 @@
-/* !!! SOBRESCREVER BOOTSTRAP - MÁXIMA PRIORIDADE !!! */
-:root {
-    --bs-body-bg: #f8dadb !important;
-}
+/* =====================================
+   APP.CSS - LAYOUT AJUSTADO (CORRIGIDO)
+   ===================================== */
 
-body {
-    background-color: #f8dadb !important;
-    --bs-body-bg: #f8dadb !important;
-}
-
-html {
-    background-color: #f8dadb !important;
-}
-
-* {
-    background-color: #f8dadb !important;
-}
-/* === SOBRESCREVER BOOTSTRAP - FUNDO ROSA === */
-:root {
-    --bs-body-bg: #f8dadb !important;
-}
-
-body {
-    background-color: #f8dadb !important;
-    --bs-body-bg: #f8dadb !important;
-}
-
+/* === FUNDO ROSA BASE === */
 html, body {
     background-color: #f8dadb !important;
     margin: 0 !important;
     padding: 0 !important;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    font-weight: 400 !important;
+    line-height: 1.5 !important;
 }
 
-/* === Estilo base === */
-html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-}
-
-a, .btn-link {
-    color: #006bb7;
-}
-
-.btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
+/* === CONTEÚDO PRINCIPAL MAIS À DIREITA === */
 .content {
-    padding-top: 1.1rem;
+    padding: 2rem 2rem 2rem 5rem !important;
+    max-width: 1200px;
+    margin: 0 auto !important;
+    background-color: #f8dadb !important;
 }
 
-h1:focus {
-    outline: none;
-}
-
-.valid.modified:not([type=checkbox]) {
-    outline: 1px solid #26b050;
-}
-
-.invalid {
-    outline: 1px solid #e50000;
-}
-
-.validation-message {
-    color: #e50000;
-}
-
-.blazor-error-boundary {
-    background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTYiIGhlaWdodD0iNDkiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIG92ZXJmbG93PSJoaWRkZW4iPjxkZWZzPjxjbGlwUGF0aCBpZD0iY2xpcDAiPjxyZWN0IHg9IjIzNSIgeT0iNTEiIHdpZHRoPSI1NiIgaGVpZ2h0PSI0OSIvPjwvY2xpcFBhdGg+PC9kZWZzPjxnIGNsaXAtcGF0aD0idXJsKCNjbGlwMCkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yMzUgLTUxKSI+PHBhdGggZD0iTTI2My41MDYgNTFDMjY0LjcxNyA1MSAyNjUuODEzIDUxLjQ4MzcgMjY2LjYwNiA1Mi4yNjU4TDI2Ny4wNTIgNTIuNzk4NyAyNjcuNTM5IDUzLjYyODMgMjkwLjE4NSA5Mi4xODMxIDI5MC41NDUgOTIuNzk1IDI5MC42NTYgOTIuOTk2QzI5MC44NzcgOTMuNTEzIDI5MSA5NC4wODE1IDI5MSA5NC42NzgyIDI5MSA5Ny4wNjUxIDI4OS4wMzggOTkgMjg2LjYxNyA5OUwyNDAuMzgzIDk5QzIzNy45NjMgOTkgMjM2IDk3LjA2NTEgMjM2IDk0LjY3ODIgMjM2IDk0LjM3OTkgMjM2LjAzMSA5NC4wODg2IDIzNi4wODkgOTMuODA3MkwyMzYuMzM4IDkzLjAxNjIgMjM2Ljg1OCA5Mi4xMzE0IDI1OS40NzMgNTMuNjI5NCAyNTkuOTYxIDUyLjc5ODUgMjYwLjQwNyA1Mi4yNjU4QzI2EuMjA2IDUxLjQ4MzcgMjYyLjI5NiA1MSAyNjMuNTA2IDUxWk0yNjMuNTg2IDY2LjAxODNDMjYwLjczNyA2Ni4wMTgzIDI1OS4zMTMgNjcuMTI0NSAyNTkuMzEzIDY5LjMzNyAyNTkuMzEzIDY5LjYxMDIgMjU5LjMzMiA2OS44NjA4IDI1OS4zNzEgNzAuMDg4N0wyNjEuNzk1IDg0LjAxNjEgMjY1LjM4IDg0LjAxNjEgMjY3LjgyMSA2OS43NDc1QzI2Ny44NiA2OS43MzA5IDI2Ny44NzkgNjkuNTg3NyAyNjcuODc5IDY5LjMxNzkgMjY3Ljg3OSA2Ny4xMTgyIDI2Ni40NDggNjYuMDE4MyAyNjMuNTg2IDY2LjAxODNaTTI2My41NzYgODYuMDU0N0MyNjEuMDQ5IDg2LjA1NDcgMjU5Ljc4NiA4Ny4zMDA1IDI1OS43ODYgODkuNzkyMSAyNTkuNzg2IDkyLjI4MzcgMjYxLjA0OSA5My41Mjk1IDI2My41NzYgOTMuNTI5NSAyNjYuMTE2IDkzLjUyOTUgMjY3LjM4NyA5Mi4yODM3IDI2Ny4zODcgODkuNzkyMSAyNjcuMzg3IDg3LjMwMDUgMjY2LjExNiA4Ni4wNTQ3IDI2My41NzYgODYuMDU0N1oiIGZpbGw9IiNGRkU1MDAiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPjwvZz48L3N2Zz4=) no-repeat 1rem/1.8rem, #b32121;
-    padding: 1rem 1rem 1rem 3.7rem;
-    color: white;
-}
-
-    .blazor-error-boundary::after {
-        content: "An error has occurred.";
-    }
-
-.darker-border-checkbox.form-check-input {
-    border-color: #929292;
-}
-
-/* === Personalização cor-de-rosa === */
-
-/* Navbar e Top Row */
-.navbar,
-.navbar-light,
-.navbar-dark,
-.top-row {
-    background: linear-gradient(90deg, #ff69b4 0%, #ff85c1 100%) !important;
-    color: white !important;
+/* === CARD INTEGRADO AO FUNDO === */
+html body article.content .card.formulario-rosa {
+    background-color: #f5d1d3 !important;
     border: none !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    margin: 0.5rem auto 1.5rem auto !important;
+    max-width: 100% !important;
+    min-height: 220px !important;
 }
 
-    /* Links na navbar */
-    .navbar .nav-link,
-    .navbar-light .nav-link,
-    .navbar-dark .nav-link,
-    .top-row a {
-        color: white !important;
-        text-decoration: none;
-    }
-
-        .navbar .nav-link:hover,
-        .top-row a:hover {
-            text-decoration: underline;
-        }
-
-/* Botão do menu */
-.navbar-toggler,
-.navbar-toggler:focus,
-.navbar-toggler:active {
-    color: white !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
-    background: rgba(255, 255, 255, 0.1) !important;
+html body article.content .card.formulario-rosa .card-body {
+    background-color: #f5d1d3 !important;
+    padding: 1.5rem !important;
 }
 
-/* Sidebar */
-.sidebar {
-    background: linear-gradient(180deg, #ff69b4 0%, #ff85c1 100%) !important;
-    color: white !important;
+/* TÍTULO DO CARD */
+html body article.content .card.formulario-rosa h4 {
+    color: #333 !important;
+    font-size: 1.6rem !important;
+    font-weight: normal !important;
+    margin-bottom: 1.2rem !important;
+    text-align: left !important;
+    margin-top: 0 !important;
+}
+
+/* FORMULÁRIO EM LINHA MAIS COMPACTO */
+html body article.content .card.formulario-rosa .row {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 1.2rem !important;
+    align-items: flex-end !important;
+    margin-bottom: 1.2rem !important;
+}
+
+html body article.content .card.formulario-rosa .col-md-6 {
+    flex: 1 !important;
+    min-width: 160px !important;
+}
+
+/* LABELS */
+html body article.content .card.formulario-rosa .form-group-rosa label.form-label {
+    font-weight: 500 !important;
+    color: #333 !important;
+    margin-bottom: 8px !important;
+    display: block !important;
+    font-size: 1rem !important;
+}
+
+/* INPUTS (AGORA COM LARGURA CONTROLADA) */
+html body article.content .card.formulario-rosa .form-group-rosa .form-control {
+    background-color: white !important;
+    border: 2px solid #e0e0e0 !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    width: 100% !important;
+    max-width: 400px !important; /* ?? limita o comprimento */
+    font-size: 1rem !important;
+    height: 38px !important;
+    font-weight: 400 !important;
+}
+
+/* Centralizar o input e botão (opcional) */
+html body article.content .card.formulario-rosa .form-group-rosa {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* muda para center se quiseres centralizar */
+}
+
+/* BOTÕES DO FORMULÁRIO FINOS */
+.card.formulario-rosa .btn,
+.card.formulario-rosa .btn-success,
+.card.formulario-rosa .btn-secondary {
+    font-weight: 400 !important;
+    padding: 6px 14px !important;
+    font-size: 1rem !important;
+    border-radius: 4px !important;
+    margin-right: 6px !important;
+}
+
+/* BOTÕES NA MESMA LINHA */
+html body article.content .card.formulario-rosa .d-flex.flex-wrap {
+    gap: 10px !important;
+    margin-top: 1rem !important;
+}
+
+/* === TABELA ROSA === */
+html body article.content .horario-table {
+    background-color: #f5d1d3 !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-top: 0.5rem !important;
+}
+
+/* CABEÇALHO DA TABELA */
+html body article.content .horario-table thead {
+    background-color: #ebbec2 !important;
+    border-bottom: 2px solid #dfb7bb !important;
+}
+
+html body article.content .horario-table th {
+    background-color: #ebbec2 !important;
+    color: #333 !important;
+    font-weight: 600 !important;
+    padding: 12px !important;
     border: none !important;
+    font-size: 1rem !important;
+    text-align: left !important;
 }
 
-    .sidebar .nav-link {
-        color: white !important;
+/* CÉLULAS DA TABELA */
+html body article.content .horario-table td {
+    background-color: #f5d1d3 !important;
+    padding: 10px 16px !important;
+    border-color: #dfb7bb !important;
+    font-size: 1rem !important;
+    vertical-align: middle !important;
+    font-weight: 400 !important;
+}
+
+/* BOTÕES PADRÃO NA TABELA */
+html body article.content .horario-table .btn-outline-primary,
+html body article.content .horario-table .btn-outline-danger {
+    padding: 6px 16px !important;
+    font-weight: 500 !important;
+    font-size: 1rem !important;
+    border-radius: 8px !important;
+    margin-right: 6px !important;
+}
+
+html body article.content .horario-table .d-flex.flex-wrap {
+    gap: 7px !important;
+    flex-wrap: nowrap !important;
+}
+
+/* === TÍTULOS PRINCIPAIS === */
+html body article.content h3 {
+    color: #333 !important;
+    font-size: 1.6rem !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+    margin-bottom: 0.5rem !important;
+}
+
+html body article.content h4 {
+    color: #333 !important;
+    font-size: 1.2rem !important;
+    font-weight: 500 !important;
+    text-align: left !important;
+    margin: 1.2rem 0 0.8rem 0 !important;
+}
+
+/* === RESPONSIVIDADE === */
+@media (max-width: 768px) {
+    .content {
+        padding: 1rem !important;
     }
 
-        .sidebar .nav-link:hover,
-        .sidebar .nav-link:focus,
-        .sidebar .nav-link:active {
-            text-decoration: underline;
-        }
+    html body article.content .card.formulario-rosa {
+        margin: 0 1rem 1rem 1rem !important;
+        min-height: auto !important;
+    }
 
-/* OVERRIDE TOTAL - REMOVE QUALQUER BRANCO */
-body, html, main, article, div {
-    background-color: #f8dadb !important;
-}
+    html body article.content .card.formulario-rosa .card-body {
+        padding: 1rem !important;
+    }
 
+    html body article.content .card.formulario-rosa .row {
+        flex-wrap: wrap !important;
+        gap: 1rem !important;
+    }
 
-/* !!! SOBRESCREVER BOOTSTRAP - CARREGADO POR ÚLTIMO !!! */
-:root {
-    --bs-body-bg: #f8dadb !important;
-}
-
-body {
-    background-color: #f8dadb !important;
-    --bs-body-bg: #f8dadb !important;
-}
-
-html, body, main, article, .page, .content {
-    background-color: #f8dadb !important;
+    html body article.content .card.formulario-rosa .form-group-rosa .form-control {
+        max-width: 100% !important; /* ?? em mobile, volta a ocupar toda a largura */
+    }
 }

@@ -10,16 +10,16 @@
 
 @rendermode InteractiveServer
 
-<div class="container-fluid py-3">
-    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 gap-2">
-        <h3>As Minhas Reservas</h3>
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">As Minhas Reservas</h3>
         <button class="btn btn-outline-danger" @onclick="Logout">Sair</button>
     </div>
 
     @if (isLoading)
     {
         <div class="alert alert-info">
-            <span class="spinner-border spinner-border-sm"></span> A carregar reservas...
+            <span class="spinner-border spinner-border-sm" role="status"></span> A carregar...
         </div>
     }
     else if (usuarioLogado == null)
@@ -28,159 +28,154 @@
     }
     else
     {
-        <!-- Mensagens -->
-        <div class="mt-2">
-            @if (!string.IsNullOrEmpty(successMessage))
-            {
-                <div class="alert alert-success">@successMessage</div>
-            }
-            @if (!string.IsNullOrEmpty(errorMessage))
-            {
-                <div class="alert alert-danger">@errorMessage</div>
-            }
-        </div>
-
         @if (reservaEmEdicao == null)
         {
             <!-- Lista de Reservas -->
-            @if (reservas == null || !reservas.Any())
-            {
-                <div class="alert alert-secondary">Ainda não tem reservas.</div>
-            }
-            else
-            {
-                <div class="row justify-content-center">
-                    <div class="col-12 col-md-10 col-lg-8">
-                        <div class="card mb-4" style="background-color: #f5d1d3; border-radius: 12px;">
-                            <div class="card-body p-3 p-md-4">
-                                <h5 class="fw-bold mb-3 text-dark">Minhas Reservas</h5>
-
-                                <div class="table-responsive">
-                                    <table class="table table-striped align-middle">
-                                        <thead>
-                                            <tr>
-                                                <th>Sala</th>
-                                                <th>Início</th>
-                                                <th>Fim</th>
-                                                <th>Observação</th>
-                                                <th>Ações</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var r in reservas.OrderBy(r => r.DataHoraInicio))
-                                            {
-                                                <tr>
-                                                    <td>@r.SalaNome</td>
-                                                    <td>@r.DataHoraInicio.ToString("dd/MM/yyyy HH:mm")</td>
-                                                    <td>@r.DataHoraFim.ToString("dd/MM/yyyy HH:mm")</td>
-                                                    <td>
-                                                        @if (!string.IsNullOrEmpty(r.Mensagem))
-                                                        {
-                                                            <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-1">
-                                                                <button class="btn btn-sm btn-info mb-1 mb-md-0"
-                                                                        @onclick="() => ToggleMensagem(r.Id)"
-                                                                        title="Ver mensagem">
-                                                                    📝
-                                                                </button>
-                                                                @if (mensagemVisivel == r.Id)
-                                                                {
-                                                                    <div class="alert alert-info p-2 small text-wrap mb-0" style="max-width: 250px; position: relative;">
-                                                                        @r.Mensagem
-                                                                        <button class="btn btn-sm btn-close position-absolute top-0 end-0 m-1 p-0"
-                                                                                @onclick="() => FecharMensagem()"
-                                                                                style="font-size: 0.7rem;"></button>
-                                                                    </div>
-                                                                }
-                                                            </div>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span class="text-muted">-</span>
-                                                        }
-                                                    </td>
-                                                    <td>
-                                                            <button class="btn btn-sm btn-outline-primary" @onclick="() => EditarReserva(r)">Editar</button>
-                                                            <button class="btn btn-sm btn-outline-danger" @onclick="() => ApagarReserva(r.Id)">Remover</button>                         
-                                                    </td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
+            <h4>As Minhas Reservas</h4>
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Sala</th>
+                            <th>Início</th>
+                            <th>Fim</th>
+                            <th>Observação</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (reservas == null || !reservas.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">
+                                    Não existem reservas.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var r in reservas.OrderBy(r => r.DataHoraInicio))
+                            {
+                                <tr>
+                                    <td>@r.SalaNome</td>
+                                    <td>@r.DataHoraInicio.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@r.DataHoraFim.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(r.Mensagem))
+                                        {
+                                            <div>
+                                                <button class="btn btn-sm btn-info mb-1"
+                                                        @onclick="() => ToggleMensagem(r.Id)"
+                                                        title="Ver mensagem">
+                                                    📝
+                                                </button>
+                                                @if (mensagemVisivel == r.Id)
+                                                {
+                                                    <div class="alert alert-info p-2 mt-1 small" style="max-width: 300px;">
+                                                        @r.Mensagem
+                                                        <button class="btn btn-sm btn-close float-end p-0"
+                                                                @onclick="() => FecharMensagem()"
+                                                                style="font-size: 0.7rem;"></button>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            <button class="btn btn-sm btn-outline-primary me-2"
+                                                    @onclick="() => EditarReserva(r)">
+                                                Editar
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                    @onclick="() => ApagarReserva(r.Id)">
+                                                Remover
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
         }
         else
         {
-            <!-- Card de Edição -->
-            <div class="row justify-content-center">
-                <div class="col-12 col-md-10 col-lg-8">
-                    <div class="card mb-4" style="background-color: #f5d1d3; border-radius: 12px;">
-                        <div class="card-body p-3 p-md-4">
-                            <h5 class="fw-bold mb-3 text-dark">Editar Reserva</h5>
+            <!-- Formulário de Edição -->
+            <div class="card mb-4 formulario-rosa">
+                <div class="card-body">
+                    <h4>Editar Reserva</h4>
 
-                            <!-- Sala -->
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Sala</label>
-                                <select class="form-select w-100" @bind="SelectedSalaId" @bind:event="onchange">
-                                    <option value="0">-- Selecionar Sala --</option>
-                                    @foreach (var sala in salas)
-                                    {
-                                        <option value="@sala.Id">@sala.Nome</option>
-                                    }
-                                </select>
-                            </div>
-
-                            <!-- Data -->
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Dia</label>
-                                <input type="date" class="form-control w-100" @bind="selectedDate" @bind:event="onchange" />
-                            </div>
-
-                            <!-- Horários disponíveis -->
-                            @if (availableTimes.Any() && SelectedSalaId != 0)
+                    <!-- Sala -->
+                    <div class="mb-3 form-group-rosa">
+                        <label class="form-label">Sala</label>
+                        <select class="form-select" @bind="SelectedSalaId" @bind:event="onchange">
+                            <option value="0">-- Selecionar Sala --</option>
+                            @foreach (var sala in salas)
                             {
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold">Horários Disponíveis (@selectedDate:dd/MM/yyyy)</label>
-                                    <div class="d-flex flex-wrap">
-                                        @foreach (var kv in availableTimes)
-                                        {
-                                            var slotKey = kv.Key;
-                                            var isFree = kv.Value;
-                                            var isSelected = selectedTimeSlots.Contains(slotKey);
-                                            var dotClass = isFree ? (isSelected ? "bg-primary" : "bg-success") : "bg-danger";
-                                            var containerClass = isSelected ? "border-primary" : "border-secondary";
-
-                                            <div class="d-flex align-items-center border rounded flex-grow-1 flex-md-grow-0 px-3 py-2 m-1 @containerClass"
-                                                 style="cursor:@(isFree ? "pointer" : "not-allowed");
-                                                                        min-width:160px;
-                                                                        background-color:@(isSelected ? "#f8bfc5" : "white");"
-                                                 @onclick="() => ToggleTimeSlot(slotKey, isFree)">
-                                                <div class="rounded-circle @dotClass" style="width:14px; height:14px; margin-right:12px;"></div>
-                                                <div class="text-truncate" style="max-width: calc(100% - 26px);">@slotKey</div>
-                                            </div>
-                                        }
-                                    </div>
-                                </div>
+                                <option value="@sala.Id">@sala.Nome</option>
                             }
+                        </select>
+                    </div>
 
-                            <!-- Mensagem -->
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Mensagem (opcional)</label>
-                                <textarea class="form-control w-100" @bind="mensagem" rows="3"
-                                          placeholder="Ex: Só vou usar a sala por 1 hora, ou Ocorreu um problema na sala..."></textarea>
-                                <small class="form-text text-muted">Máximo 500 caracteres</small>
-                            </div>
+                    <!-- Data -->
+                    <div class="mb-3 form-group-rosa">
+                        <label class="form-label">Dia</label>
+                        <input type="date" class="form-control" @bind="selectedDate" @bind:event="onchange" />
+                    </div>
 
-                            <div class="d-flex flex-column flex-sm-row gap-2 justify-content-end mt-3">
-                                <button class="btn btn-secondary" @onclick="CancelarEdicao">Cancelar</button>
-                                <button class="btn btn-success" @onclick="SalvarEdicao">Guardar Alterações</button>
+                    <!-- Horários disponíveis -->
+                    @if (availableTimes.Any() && SelectedSalaId != 0)
+                    {
+                        <div class="mb-3 form-group-rosa">
+                            <label class="form-label">Horários Disponíveis (@selectedDate.ToString("dd/MM/yyyy"))</label>
+                            <div class="d-flex flex-wrap">
+                                @foreach (var kv in availableTimes)
+                                {
+                                    var slotKey = kv.Key;
+                                    var isFree = kv.Value;
+                                    var isSelected = selectedTimeSlots.Contains(slotKey);
+                                    var dotClass = isFree ? (isSelected ? "bg-primary" : "bg-success") : "bg-danger";
+                                    var containerClass = isSelected ? "border-primary" : "border-secondary";
+
+                                    <div class="d-flex align-items-center border rounded px-3 py-2 m-1 @containerClass"
+                                         style="cursor:@(isFree ? "pointer" : "not-allowed"); min-width:180px;"
+                                         @onclick="() => ToggleTimeSlot(slotKey, isFree)">
+                                        <div class="rounded-circle @dotClass" style="width:14px; height:14px; margin-right:12px;"></div>
+                                        <div>@slotKey</div>
+                                    </div>
+                                }
                             </div>
                         </div>
+                    }
+
+                    <!-- Mensagem -->
+                    <div class="mb-3 form-group-rosa">
+                        <label class="form-label">Observação (opcional)</label>
+                        <textarea class="form-control" @bind="mensagem" rows="3"
+                                  placeholder="Ex: Só vou usar a sala por 1 hora, ou Ocorreu um problema na sala..."
+                                  maxlength="500"></textarea>
+                        <small class="form-text text-muted">Máximo 500 caracteres</small>
                     </div>
+
+                    <div class="d-flex flex-wrap gap-2 mt-4">
+                        <button class="btn btn-success" @onclick="SalvarEdicao">Guardar Alterações</button>
+                        <button class="btn btn-secondary" @onclick="CancelarEdicao">Cancelar</button>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(successMessage))
+                    {
+                        <div class="alert alert-success mt-3 mb-0">@successMessage</div>
+                    }
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger mt-3 mb-0">@errorMessage</div>
+                    }
                 </div>
             </div>
         }
@@ -294,7 +289,14 @@
 
     private void ToggleMensagem(int reservaId)
     {
-        mensagemVisivel = mensagemVisivel == reservaId ? null : reservaId;
+        if (mensagemVisivel == reservaId)
+        {
+            mensagemVisivel = null;
+        }
+        else
+        {
+            mensagemVisivel = reservaId;
+        }
         StateHasChanged();
     }
 

@@ -9,99 +9,102 @@
 
 @rendermode InteractiveServer
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3>Gestão de Horários</h3>
-    <button class="btn btn-outline-danger" @onclick="Logout">Sair</button>
-</div>
-
-@if (isLoadingInitial)
-{
-    <div class="alert alert-info">
-        <span class="spinner-border spinner-border-sm" role="status"></span> A carregar...
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Gestão de Horários</h3>
+        <button class="btn btn-outline-danger" @onclick="Logout">Sair</button>
     </div>
-}
-else if (usuarioLogado == null)
-{
-    <div class="alert alert-warning">Utilizador não autenticado. A redirecionar...</div>
-}
-else if (usuarioLogado.RoleId != 1)
-{
-    <div class="alert alert-danger">Acesso negado. Apenas administradores podem gerir horários.</div>
-}
-else
-{
-    <!-- Formulário -->
-    <div class="card mb-4 formulario-rosa"
-         style="background-color: #f5d1d3 !important; border: none !important; border-radius: 12px !important;
-                            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;">
-        <div class="card-body" style="background-color: #f5d1d3 !important; padding: 25px !important;">
-            <h4>@(editingHorarioId.HasValue ? "Editar Horário" : "Criar Novo Horário")</h4>
 
-            <div class="row mb-3">
-                <div class="col-md-5 form-group-rosa">
-                    <label class="form-label">Hora de Início</label>
-                    <input type="time" class="form-control" @bind="horaInicioDt" />
-                </div>
-                <div class="col-md-5 form-group-rosa">
-                    <label class="form-label">Hora de Fim</label>
-                    <input type="time" class="form-control" @bind="horaFimDt" />
-                </div>
-            </div>
-
-            <div class="d-flex flex-wrap gap-2 mt-3">
-                <button class="btn btn-success" @onclick="SalvarHorario">
-                    @(editingHorarioId.HasValue ? "Guardar Alterações" : "Adicionar Horário")
-                </button>
-                <button class="btn btn-secondary" @onclick="CancelarEdicao" disabled="@(editingHorarioId == null)">Cancelar</button>
-            </div>
-
-            @if (!string.IsNullOrEmpty(successMessage))
-            {
-                <div class="alert alert-success mt-3">@successMessage</div>
-            }
-            @if (!string.IsNullOrEmpty(errorMessage))
-            {
-                <div class="alert alert-danger mt-3">@errorMessage</div>
-            }
+    @if (isLoadingInitial)
+    {
+        <div class="alert alert-info">
+            <span class="spinner-border spinner-border-sm" role="status"></span> A carregar...
         </div>
-    </div>
+    }
+    else if (usuarioLogado == null)
+    {
+        <div class="alert alert-warning">Utilizador não autenticado. A redirecionar...</div>
+    }
+    else if (usuarioLogado.RoleId != 1)
+    {
+        <div class="alert alert-danger">Acesso negado. Apenas administradores podem gerir horários.</div>
+    }
+    else
+    {
+        <!-- Formulário com cor rosa -->
+        <div class="card mb-4 formulario-rosa">
+            <div class="card-body">
+                <h4 class="card-title mb-4">@(editingHorarioId.HasValue ? "Editar Horário" : "Criar Novo Horário")</h4>
 
-    <!-- Lista -->
-    <h4>Lista de Horários</h4>
-    <div class="table-responsive">
-        <table class="table table-striped align-middle">
-            <thead>
-                <tr>
-                    <th>Hora de Início</th>
-                    <th>Hora de Fim</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (!horarios.Any())
+                <div class="row g-3">
+                    <div class="col-md-6 form-group-rosa">
+                        <label class="form-label">Hora de Início</label>
+                        <input type="time" class="form-control" @bind="horaInicioDt" />
+                    </div>
+                    <div class="col-md-6 form-group-rosa">
+                        <label class="form-label">Hora de Fim</label>
+                        <input type="time" class="form-control" @bind="horaFimDt" />
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    <button class="btn btn-success" @onclick="SalvarHorario">
+                        @(editingHorarioId.HasValue ? "Guardar Alterações" : "Adicionar Horário")
+                    </button>
+                    <button class="btn btn-secondary" @onclick="CancelarEdicao"
+                            disabled="@(editingHorarioId == null && horaInicioDt == default && horaFimDt == default)">
+                        Cancelar
+                    </button>
+                </div>
+
+                @if (!string.IsNullOrEmpty(successMessage))
                 {
-                    <tr><td colspan="3" class="text-center text-muted">Não existem horários registados.</td></tr>
+                    <div class="alert alert-success mt-3 mb-0">@successMessage</div>
                 }
-                else
+                @if (!string.IsNullOrEmpty(errorMessage))
                 {
-                    @foreach (var h in horarios)
+                    <div class="alert alert-danger mt-3 mb-0">@errorMessage</div>
+                }
+            </div>
+        </div>
+
+        <!-- Lista de Horários -->
+        <h4 class="mb-3">Lista de Horários</h4>
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Hora de Início</th>
+                        <th>Hora de Fim</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!horarios.Any())
                     {
-                        <tr>
-                            <td>@h.HoraInicio.ToString(@"hh\:mm")</td>
-                            <td>@h.HoraFim.ToString(@"hh\:mm")</td>
-                            <td>
-                                <div class="d-flex flex-wrap gap-1">
-                                    <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => EditarHorario(h)">Editar</button>
-                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoverHorario(h.Id)">Remover</button>
-                                </div>
-                            </td>
-                        </tr>
+                        <tr><td colspan="3" class="text-center text-muted">Não existem horários registados.</td></tr>
                     }
-                }
-            </tbody>
-        </table>
-    </div>
-}
+                    else
+                    {
+                        @foreach (var h in horarios)
+                        {
+                            <tr>
+                                <td>@h.HoraInicio.ToString(@"hh\:mm")</td>
+                                <td>@h.HoraFim.ToString(@"hh\:mm")</td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => EditarHorario(h)">Editar</button>
+                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => RemoverHorario(h.Id)">Remover</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
 
 @code {
     private UserDto? usuarioLogado;
@@ -238,7 +241,6 @@ else
 
             await LoadHorarios();
 
-            // Reseta o formulário sem limpar as mensagens (já são geridas pelo timer)
             editingHorarioId = null;
             horaInicioDt = default;
             horaFimDt = default;
@@ -278,7 +280,6 @@ else
         errorMessage = string.Empty;
         StateHasChanged();
 
-        // Desaparece após 3 segundos
         await Task.Delay(3000);
         successMessage = string.Empty;
         StateHasChanged();
@@ -290,15 +291,7 @@ else
         successMessage = string.Empty;
         StateHasChanged();
 
-        // Desaparece após 5 segundos (erros ficam mais tempo)
         await Task.Delay(5000);
-        errorMessage = string.Empty;
-        StateHasChanged();
-    }
-
-    private void ClearMessages()
-    {
-        successMessage = string.Empty;
         errorMessage = string.Empty;
         StateHasChanged();
     }

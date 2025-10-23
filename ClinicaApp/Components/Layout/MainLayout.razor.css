@@ -1,4 +1,4 @@
-/* SOLU«√O NUCLEAR - FOR«AR ROSA EM TUDO */
+Ôªø/* LAYOUT CORRIGIDO - SEM FOR√áAR ROSA NOS CARDS */
 html, body {
     background-color: #f8dadb !important;
     margin: 0 !important;
@@ -64,7 +64,7 @@ nav.sidebar {
         width: 100%;
     }
 
-/* CONTE⁄DO PRINCIPAL - ROSA TOTAL */
+/* CONTE√öDO PRINCIPAL */
 main {
     flex: 1;
     overflow-y: auto;
@@ -74,7 +74,7 @@ main {
     padding: 0 !important;
 }
 
-/* ARTICLE - REMOVER TODOS OS ESPA«OS BRANCOS */
+/* ARTICLE - FUNDO ROSA MAS PERMITE CONTE√öDO BRANCO */
 article.content {
     background-color: #f8dadb !important;
     min-height: 100vh;
@@ -124,14 +124,4 @@ article.content {
         top: 0.5rem;
     }
 
-/* GARANTIR QUE TODOS OS ELEMENTOS DENTRO SEJAM ROSA */
-.page * {
-    background-color: #f8dadb !important;
-}
-
-/* REMOVER QUALQUER PADDING/MARGIN RESIDUAL */
-body > div,
-body > main,
-body > article {
-    background-color: #f8dadb !important;
-}
+/* REMOVER AS LINHAS PROBLEM√ÅTICAS QUE FOR√áAM ROSA EM TUDO */

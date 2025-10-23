@@ -1,147 +1,150 @@
 ﻿@page "/UserManagement"
 @using ClinicaApp.DTO
-@using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject HttpClient Http
-@inject IJSRuntime JsRuntime
-@inject ProtectedSessionStorage SessionStorage
 @inject NavigationManager Navigation
+@inject ProtectedSessionStorage SessionStorage
+@inject IJSRuntime JsRuntime
 
 @rendermode InteractiveServer
-<link href="UserManagement.razor.css" rel="stylesheet" />
 
-<div class="user-management-page">
-    <div class="user-management-container">
-        <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
-            <h3 class="mb-0">Gestão de Profissionais</h3>
-            <button class="btn btn-outline-danger mt-2 mt-md-0" @onclick="Logout">Sair</button>
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Gestão de Profissionais</h3>
+        <button class="btn btn-outline-danger" @onclick="Logout">Sair</button>
+    </div>
+
+    @if (isLoadingInitial)
+    {
+        <div class="alert alert-info">
+            <span class="spinner-border spinner-border-sm" role="status"></span> A carregar...
         </div>
-
+    }
+    else if (usuarioLogado == null)
+    {
+        <div class="alert alert-warning">Não autenticado. A redirecionar...</div>
+    }
+    else if (usuarioLogado.RoleId != 1)
+    {
+        <div class="alert alert-danger">Acesso negado. Apenas administradores podem gerir profissionais.</div>
+    }
+    else
+    {
         <!-- Formulário -->
-        <div class="card mb-4 formulario-rosa"
-             style="background-color: #f5d1d3 !important; border: none !important; border-radius: 12px !important; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;">
-            <div class="card-body" style="background-color: #f5d1d3 !important; padding: 25px !important;">
+        <div class="card mb-4 formulario-rosa">
+            <div class="card-body">
                 <h4>@(editMode ? "Editar Profissional" : "Criar Novo Profissional")</h4>
-
-                <EditForm Model="@currentUser" OnValidSubmit="SaveUser">
-                    <!-- REMOVI O ValidationSummary PARA NÃO APARECER EM CIMA -->
-                    <DataAnnotationsValidator />
-
-                    <div class="row">
-                        <div class="col-md-6 mb-2 form-group-rosa">
-                            <label class="form-label">Nome</label>
-                            <InputText class="form-control" @bind-Value="currentUser.Nome" />
-                            <ValidationMessage For="@(() => currentUser.Nome)" />
-                        </div>
-
-                        <div class="col-md-6 mb-2 form-group-rosa">
-                            <label class="form-label">Email</label>
-                            <InputText class="form-control" @bind-Value="currentUser.Email" />
-                            <ValidationMessage For="@(() => currentUser.Email)" />
-                        </div>
-
-                        <div class="col-md-6 mb-2 form-group-rosa">
-                            <label class="form-label">Telemóvel</label>
-                            <InputText class="form-control" @bind-Value="currentUser.Telefone" />
-                            <ValidationMessage For="@(() => currentUser.Telefone)" />
-                        </div>
-
-                        <div class="col-md-6 mb-2 form-group-rosa">
-                            <label class="form-label">Função</label>
-                            <InputSelect class="form-control" @bind-Value="currentUser.RoleId">
-                                @foreach (var role in roles)
-                                {
-                                    <option value="@role.Key">@role.Value</option>
-                                }
-                            </InputSelect>
-                            <ValidationMessage For="@(() => currentUser.RoleId)" />
-                        </div>
-
-                        <div class="col-md-6 mb-2 form-group-rosa">
-                            <label class="form-label">Especialidade</label>
-                            <InputText class="form-control" @bind-Value="currentProfissional.Especialidade" />
-                            <ValidationMessage For="@(() => currentProfissional.Especialidade)" />
-                        </div>
+                <div class="row g-3">
+                    <div class="col-md-6 col-lg-4 form-group-rosa">
+                        <label class="form-label">Nome</label>
+                        <input type="text" class="form-control" @bind="currentUser.Nome" />
                     </div>
-
-                    <div class="d-flex flex-wrap gap-2 mt-3">
-                        <button type="submit" class="btn btn-success" disabled="@isLoading">
-                            @if (isLoading)
-                            {
-                                <span class="spinner-border spinner-border-sm" role="status"></span>
-                                <text> A processar...</text>
-                            }
-                            else
-                            {
-                                <text>@(editMode ? "Guardar Alterações" : "Criar")</text>
-                            }
-                        </button>
-                        <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Cancelar</button>
+                    <div class="col-md-6 col-lg-4 form-group-rosa">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" @bind="currentUser.Email" />
                     </div>
-
-                    <!-- MANTIVE AS MENSAGENS DE SUCESSO/ERRO GERAIS AQUI -->
-                    @if (!string.IsNullOrEmpty(successMessage))
-                    {
-                        <div class="alert alert-success mt-3">@successMessage</div>
-                    }
-                    @if (!string.IsNullOrEmpty(errorMessage))
-                    {
-                        <div class="alert alert-danger mt-3">@errorMessage</div>
-                    }
-                </EditForm>
+                    <div class="col-md-6 col-lg-4 form-group-rosa">
+                        <label class="form-label">Telemóvel</label>
+                        <input type="text" class="form-control" @bind="currentUser.Telefone" />
+                    </div>
+                    <div class="col-md-6 col-lg-4 form-group-rosa">
+                        <label class="form-label">Função</label>
+                        <select class="form-control" @bind="currentUser.RoleId">
+                            @foreach (var role in roles)
+                            {
+                                <option value="@role.Key">@role.Value</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6 col-lg-4 form-group-rosa">
+                        <label class="form-label">Especialidade</label>
+                        <input type="text" class="form-control" @bind="currentProfissional.Especialidade" />
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    <button class="btn btn-success" @onclick="SaveUser" disabled="@isLoading">
+                        @if (isLoading)
+                        {
+                            <span class="spinner-border spinner-border-sm" role="status"></span>
+                            <text> A processar...</text>
+                        }
+                        else
+                        {
+                            <text>@(editMode ? "Guardar Alterações" : "Criar Profissional")</text>
+                        }
+                    </button>
+                    <button class="btn btn-secondary"
+                            @onclick="CancelEdit"
+                            disabled="@(!editMode && IsFormEmpty)">
+                        Cancelar
+                    </button>
+                </div>
+                @if (!string.IsNullOrEmpty(successMessage))
+                {
+                    <div class="alert alert-success mt-3 mb-0">@successMessage</div>
+                }
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger mt-3 mb-0">@errorMessage</div>
+                }
             </div>
         </div>
 
-        <!-- Tabela de Utilizadores -->
-        @if (users != null && users.Any())
-        {
-            <h4>Lista de Utilizadores</h4>
-            <div class="table-responsive">
-                <table class="table table-striped align-middle">
-                    <thead>
-                        <tr>
-                            <th>Nome</th>
-                            <th>Email</th>
-                            <th>Telemóvel</th>
-                            <th>Profissional</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+        <!-- Lista de Utilizadores -->
+        <h4>Lista de Utilizadores</h4>
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Telemóvel</th>
+                        <th>Especialidade</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (users == null || !users.Any())
+                    {
+                        <tr><td colspan="5" class="text-center text-muted">Não existem utilizadores.</td></tr>
+                    }
+                    else
+                    {
                         @foreach (var u in users)
                         {
                             <tr>
-                                <td data-label="Nome">@u.Nome</td>
-                                <td data-label="Email">@u.Email</td>
-                                <td data-label="Telemóvel">@u.Telefone</td>
-                                <td data-label="Profissional">@((u.Profissional != null) ? u.Profissional.Especialidade : "-")</td>
-                                <td data-label="Ações">
-                                    <button class="btn btn-sm btn-outline-primary me-2" @onclick="@(() => EditUser(u))">Editar</button>
-                                    <button class="btn btn-sm btn-outline-primary me-2" @onclick="@(() => SendPasswordReset(u.Id))">Enviar email</button>
-                                    <button class="btn btn-sm btn-outline-danger" @onclick="@(() => DeleteUser(u.Id))">Remover</button>
+                                <td>@u.Nome</td>
+                                <td>@u.Email</td>
+                                <td>@u.Telefone</td>
+                                <td>@((u.Profissional != null) ? u.Profissional.Especialidade : "-")</td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => EditUser(u)">Editar</button>
+                                        <button class="btn btn-sm btn-outline-primary me-2" @onclick="() => SendPasswordReset(u.Id)">Enviar email</button>
+                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => DeleteUser(u.Id)">Remover</button>
+                                    </div>
                                 </td>
                             </tr>
                         }
-                    </tbody>
-                </table>
-            </div>
-        }
-    </div>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>
 
 @code {
+    private UserDto? usuarioLogado;
     private List<UserDto>? users;
+    private bool isLoadingInitial = true;
+    private bool isLoading = false;
+
     private UserDto currentUser = new();
     private ProfissionalDto currentProfissional = new();
-    private UserDto? usuarioLogado;
-    private bool editMode;
-    private bool isLoading;
-    private string errorMessage = string.Empty;
-    private string successMessage = string.Empty;
+    private bool editMode = false;
 
-    private UserDto? backupUser;
-    private ProfissionalDto? backupProfissional;
+    private string successMessage = string.Empty;
+    private string errorMessage = string.Empty;
 
     private Dictionary<int, string> roles = new()
     {
@@ -149,46 +152,43 @@
         { 2, "Profissional" }
     };
 
+    private bool IsFormEmpty =>
+        string.IsNullOrWhiteSpace(currentUser.Nome) &&
+        string.IsNullOrWhiteSpace(currentUser.Email) &&
+        string.IsNullOrWhiteSpace(currentUser.Telefone) &&
+        string.IsNullOrWhiteSpace(currentProfissional.Especialidade);
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (!firstRender) return;
+
+        var result = await SessionStorage.GetAsync<UserDto>("usuarioLogado");
+        if (!result.Success || result.Value == null)
         {
-            var result = await SessionStorage.GetAsync<UserDto>("usuarioLogado");
-            if (!result.Success || result.Value == null)
-            {
-                Navigation.NavigateTo("/", forceLoad: true);
-                return;
-            }
-
-            usuarioLogado = result.Value;
-
-            // Só admins podem aceder
-            if (usuarioLogado.RoleId != 1)
-            {
-                Navigation.NavigateTo("/AcessoNegado", forceLoad: true);
-                return;
-            }
-
-            await LoadUsers();
-            StateHasChanged();
+            Navigation.NavigateTo("/", forceLoad: true);
+            return;
         }
+
+        usuarioLogado = result.Value;
+
+        if (usuarioLogado.RoleId == 1)
+        {
+            await LoadUsers();
+        }
+
+        isLoadingInitial = false;
+        StateHasChanged();
     }
 
     private async Task LoadUsers()
     {
         try
         {
-            isLoading = true;
-            users = await Http.GetFromJsonAsync<List<UserDto>>("users");
+            users = await Http.GetFromJsonAsync<List<UserDto>>("users") ?? new List<UserDto>();
         }
         catch (Exception ex)
         {
             await ShowErrorMessage($"Erro ao carregar utilizadores: {ex.Message}");
-        }
-        finally
-        {
-            isLoading = false;
-            StateHasChanged();
         }
     }
 
@@ -213,13 +213,9 @@
             }
             : new ProfissionalDto();
 
-        backupUser = currentUser;
-        backupProfissional = currentProfissional;
-
         editMode = true;
-        errorMessage = string.Empty;
         successMessage = string.Empty;
-        StateHasChanged();
+        errorMessage = string.Empty;
     }
 
     private void CancelEdit()
@@ -227,54 +223,119 @@
         currentUser = new UserDto();
         currentProfissional = new ProfissionalDto();
         editMode = false;
-        errorMessage = string.Empty;
         successMessage = string.Empty;
-        StateHasChanged();
+        errorMessage = string.Empty;
     }
 
     private async Task SaveUser()
     {
         isLoading = true;
-        errorMessage = string.Empty;
         successMessage = string.Empty;
+        errorMessage = string.Empty;
+
+        // Validações básicas
+        if (string.IsNullOrWhiteSpace(currentUser.Nome))
+        {
+            await ShowErrorMessage("O nome é obrigatório.");
+            isLoading = false;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(currentUser.Email))
+        {
+            await ShowErrorMessage("O email é obrigatório.");
+            isLoading = false;
+            return;
+        }
 
         try
         {
             HttpResponseMessage response;
 
             if (editMode && currentUser.Id > 0)
-                response = await Http.PutAsJsonAsync($"users/{currentUser.Id}", currentUser);
-            else
-                response = await Http.PostAsJsonAsync("users", currentUser);
-
-            var responseBody = await response.Content.ReadAsStringAsync();
-
-            if (response.IsSuccessStatusCode)
             {
-                if (!string.IsNullOrWhiteSpace(currentProfissional.Especialidade))
+                // EDIÇÃO
+                response = await Http.PutAsJsonAsync($"users/{currentUser.Id}", currentUser);
+
+                if (response.IsSuccessStatusCode)
                 {
-                    if (currentProfissional.Id > 0)
-                        await Http.PutAsJsonAsync($"profissionais/{currentProfissional.Id}", currentProfissional);
-                    else
+                    // Atualizar profissional se tiver especialidade
+                    if (!string.IsNullOrWhiteSpace(currentProfissional.Especialidade))
                     {
-                        var novoUser = editMode ? currentUser : await response.Content.ReadFromJsonAsync<UserDto>();
-                        currentProfissional.UserId = novoUser?.Id ?? 0;
-                        await Http.PostAsJsonAsync("profissionais", currentProfissional);
+                        if (currentProfissional.Id > 0)
+                        {
+                            await Http.PutAsJsonAsync($"profissionais/{currentProfissional.Id}", currentProfissional);
+                        }
+                        else
+                        {
+                            await Http.PostAsJsonAsync("profissionais", new
+                            {
+                                UserId = currentUser.Id,
+                                Especialidade = currentProfissional.Especialidade
+                            });
+                        }
+                    }
+
+                    await ShowSuccessMessage("Profissional editado com sucesso!");
+                    await LoadUsers(); // Recarregar da API
+                }
+                else
+                {
+                    var responseBody = await response.Content.ReadAsStringAsync();
+                    await ShowErrorMessage(string.IsNullOrWhiteSpace(responseBody) ?
+                        $"Erro: {response.StatusCode}" : responseBody);
+                }
+            }
+            else
+            {
+                // CRIAÇÃO - CORREÇÃO AQUI
+                response = await Http.PostAsJsonAsync("users", currentUser);
+                var responseBody = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var novoUser = await response.Content.ReadFromJsonAsync<UserDto>();
+
+                    if (novoUser != null)
+                    {
+                        // Criar profissional se tiver especialidade
+                        if (!string.IsNullOrWhiteSpace(currentProfissional.Especialidade))
+                        {
+                            var profissionalResponse = await Http.PostAsJsonAsync("profissionais", new
+                            {
+                                UserId = novoUser.Id,
+                                Especialidade = currentProfissional.Especialidade
+                            });
+
+                            if (profissionalResponse.IsSuccessStatusCode)
+                            {
+                                // Atualizar a lista LOCALMENTE com o novo profissional
+                                novoUser.Profissional = new ProfissionalDto
+                                {
+                                    UserId = novoUser.Id,
+                                    Especialidade = currentProfissional.Especialidade
+                                };
+                            }
+                        }
+
+                        // Adicionar o novo user à lista local
+                        users ??= new List<UserDto>();
+                        users.Add(novoUser);
+
+                        await ShowSuccessMessage("Profissional criado com sucesso!");
                     }
                 }
-
-                await ShowSuccessMessage(editMode ? "Editado com sucesso!" : "Criado com sucesso!");
-                await LoadUsers();
-
-                // Reseta o formulário sem limpar as mensagens (já são geridas pelo timer)
-                currentUser = new UserDto();
-                currentProfissional = new ProfissionalDto();
-                editMode = false;
+                else
+                {
+                    await ShowErrorMessage(string.IsNullOrWhiteSpace(responseBody) ?
+                        $"Erro: {response.StatusCode}" : responseBody);
+                }
             }
-            else
-            {
-                await ShowErrorMessage(string.IsNullOrWhiteSpace(responseBody) ? $"{response.StatusCode}" : responseBody);
-            }
+
+            // Reset do formulário
+            currentUser = new UserDto();
+            currentProfissional = new ProfissionalDto();
+            editMode = false;
         }
         catch (Exception ex)
         {
@@ -297,20 +358,20 @@
             var response = await Http.DeleteAsync($"users/{userId}");
             if (response.IsSuccessStatusCode)
             {
-                await ShowSuccessMessage("Removido com sucesso!");
+                await ShowSuccessMessage("Utilizador removido com sucesso!");
                 await LoadUsers();
             }
             else
             {
                 var body = await response.Content.ReadAsStringAsync();
-                await ShowErrorMessage(string.IsNullOrWhiteSpace(body) ? $"Erro ao remover: {response.StatusCode}" : body);
+                await ShowErrorMessage(string.IsNullOrWhiteSpace(body) ?
+                    $"Erro ao remover: {response.StatusCode}" : body);
             }
         }
         catch (Exception ex)
         {
             await ShowErrorMessage($"Erro inesperado: {ex.Message}");
         }
-        StateHasChanged();
     }
 
     private async Task SendPasswordReset(int userId)
@@ -320,19 +381,19 @@
             var response = await Http.PostAsync($"users/send-password-reset?userId={userId}", null);
             if (response.IsSuccessStatusCode)
             {
-                await ShowSuccessMessage("Email enviado!");
+                await ShowSuccessMessage("Email enviado com sucesso!");
             }
             else
             {
                 var body = await response.Content.ReadAsStringAsync();
-                await ShowErrorMessage(string.IsNullOrWhiteSpace(body) ? $"Erro ao enviar email: {response.StatusCode}" : body);
+                await ShowErrorMessage(string.IsNullOrWhiteSpace(body) ?
+                    $"Erro ao enviar email: {response.StatusCode}" : body);
             }
         }
         catch (Exception ex)
         {
             await ShowErrorMessage($"Erro inesperado: {ex.Message}");
         }
-        StateHasChanged();
     }
 
     private async Task ShowSuccessMessage(string message)
@@ -341,7 +402,6 @@
         errorMessage = string.Empty;
         StateHasChanged();
 
-        // Desaparece após 3 segundos
         await Task.Delay(3000);
         successMessage = string.Empty;
         StateHasChanged();
@@ -353,15 +413,7 @@
         successMessage = string.Empty;
         StateHasChanged();
 
-        // Desaparece após 5 segundos (erros ficam mais tempo)
         await Task.Delay(5000);
-        errorMessage = string.Empty;
-        StateHasChanged();
-    }
-
-    private void ClearMessages()
-    {
-        successMessage = string.Empty;
         errorMessage = string.Empty;
         StateHasChanged();
     }
