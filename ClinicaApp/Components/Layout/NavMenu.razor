@@ -4,54 +4,65 @@
 
 @rendermode InteractiveServer
 
-<!-- BOTÃO TOGGLE (MOBILE) -->
-<button class="sidebar-toggle-btn" @onclick="ToggleSidebar">
-    ☰
-</button>
+@if (usuarioLogado != null)
+{
+    @if (!sidebarOpen)
+    {
+        <button class="sidebar-toggle-btn" @onclick="ToggleSidebar">
+            ☰
+        </button>
+    }
 
-<!-- SIDEBAR -->
-<div class="sidebar p-3 @(sidebarOpen ? "active" : "")"
-     style="background: linear-gradient(180deg, #ec9d9e 0%, #f0b0b1 100%) !important; height: 100vh; color: white;">
-    <!-- Cabeçalho da Sidebar -->
-    <div class="mb-4">
-        <div class="d-flex align-items-center">
-            <img src="/envolve-te.png" alt="ENVOLVE-TE Logo" style="width: 40px; height: 40px; margin-right: 10px;">
-            <h4 style="color: white !important; margin: 0;">ENVOLVE-TE</h4>
-        </div>
-    </div>
+    <div class="sidebar p-3 @(sidebarOpen ? "active" : "")"
+         style="background: linear-gradient(180deg, #ec9d9e 0%, #f0b0b1 100%) !important; height: 100vh; color: white;">
 
-    <div class="nav flex-column">
-        <div class="nav-item mb-2">
-            <NavLink class="nav-link" href="/Reservations" Match="NavLinkMatch.All" style="color: white !important; background-color: transparent !important; font-weight: bold !important;">
-                <span class="bi bi-calendar-check" style="color: white !important;"></span> Reservas
-            </NavLink>
-        </div>
-        <div class="nav-item mb-2">
-            <NavLink class="nav-link" href="/Perfil" Match="NavLinkMatch.All" style="color: white !important; background-color: transparent !important; font-weight: bold !important;">
-                <span class="bi bi-calendar-check" style="color: white !important;"></span> Perfil
-            </NavLink>
-        </div>
-
-        @if (usuarioLogado?.RoleId == 1)
+        @if (sidebarOpen)
         {
-            <div class="nav-item mb-2">
-                <NavLink class="nav-link" href="/UserManagement" Match="NavLinkMatch.All" style="color: white !important; background-color: transparent !important; font-weight: bold !important;">
-                    <span class="bi bi-people" style="color: white !important;"></span> Utilizadores
-                </NavLink>
-            </div>
-            <div class="nav-item mb-2">
-                <NavLink class="nav-link" href="/Salas" Match="NavLinkMatch.All" style="color: white !important; background-color: transparent !important; font-weight: bold !important;">
-                    <span class="bi bi-building" style="color: white !important;"></span> Salas
-                </NavLink>
-            </div>
-            <div class="nav-item mb-2">
-                <NavLink class="nav-link" href="/Horario" Match="NavLinkMatch.All" style="color: white !important; background-color: transparent !important; font-weight: bold !important;">
-                    <span class="bi bi-clock" style="color: white !important;"></span> Horário
-                </NavLink>
-            </div>
+            <button class="sidebar-toggle-btn" @onclick="ToggleSidebar" style="position:absolute;top:10px;left:10px;">
+                ✕
+            </button>
         }
+
+        <div class="mb-4" style="margin-top: 50px;">
+            <div class="d-flex align-items-center">
+                <img src="/envolve-te.png" alt="ENVOLVE-TE Logo" style="width: 40px; height: 40px; margin-right: 10px;">
+                <h4 style="color: white !important; margin: 0;">ENVOLVE-TE</h4>
+            </div>
+        </div>
+
+        <div class="nav flex-column">
+            <div class="nav-item mb-2">
+                <NavLink class="nav-link" href="/Reservations" Match="NavLinkMatch.All" style="color: white !important; background-color: transparent !important; font-weight: bold !important;">
+                    <span class="bi bi-calendar-check" style="color: white !important;"></span> Reservas
+                </NavLink>
+            </div>
+            <div class="nav-item mb-2">
+                <NavLink class="nav-link" href="/Perfil" Match="NavLinkMatch.All" style="color: white !important; background-color: transparent !important; font-weight: bold !important;">
+                    <span class="bi bi-calendar-check" style="color: white !important;"></span> Perfil
+                </NavLink>
+            </div>
+
+            @if (usuarioLogado?.RoleId == 1)
+            {
+                <div class="nav-item mb-2">
+                    <NavLink class="nav-link" href="/UserManagement" Match="NavLinkMatch.All" style="color: white !important; background-color: transparent !important; font-weight: bold !important;">
+                        <span class="bi bi-people" style="color: white !important;"></span> Utilizadores
+                    </NavLink>
+                </div>
+                <div class="nav-item mb-2">
+                    <NavLink class="nav-link" href="/Salas" Match="NavLinkMatch.All" style="color: white !important; background-color: transparent !important; font-weight: bold !important;">
+                        <span class="bi bi-building" style="color: white !important;"></span> Salas
+                    </NavLink>
+                </div>
+                <div class="nav-item mb-2">
+                    <NavLink class="nav-link" href="/Horario" Match="NavLinkMatch.All" style="color: white !important; background-color: transparent !important; font-weight: bold !important;">
+                        <span class="bi bi-clock" style="color: white !important;"></span> Horário
+                    </NavLink>
+                </div>
+            }
+        </div>
     </div>
-</div>
+}
 
 @implements IDisposable
 

@@ -1,287 +1,432 @@
 ﻿/* =====================================
-   APP.CSS - LAYOUT AJUSTADO (CORRIGIDO)
+   LAYOUT COMPACTO - CONTEÚDO À DIREITA
    ===================================== */
 
-/* === FUNDO ROSA BASE === */
+/* === RESET BÁSICO === */
 html, body {
-    background-color: #f8dadb !important;
     margin: 0 !important;
     padding: 0 !important;
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     font-weight: 400 !important;
     line-height: 1.5 !important;
-}
-
-/* === CONTEÚDO PRINCIPAL MAIS À DIREITA === */
-.content {
-    padding: 2rem 2rem 2rem 5rem !important;
-    max-width: 1200px;
-    margin: 0 auto !important;
     background-color: #f8dadb !important;
+    height: 100%;
 }
 
-/* === CARD INTEGRADO AO FUNDO === */
-html body article.content .card.formulario-rosa {
+/* === ESTRUTURA PRINCIPAL === */
+.page {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f8dadb !important;
+    position: relative;
+}
+
+/* === SIDEBAR OVERLAY === */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 250px;
+    height: 100vh;
+    padding: 1rem;
+    background: linear-gradient(180deg, #ec9d9e 0%, #f0b0b1 100%);
+    color: white;
+    transition: left 0.3s ease;
+    z-index: 1000;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+}
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    .sidebar .nav-link {
+        display: flex;
+        align-items: center;
+        color: white !important;
+        font-weight: bold !important;
+        background-color: transparent !important;
+        margin-bottom: 0.5rem;
+        text-decoration: none;
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+        transition: background 0.3s ease;
+    }
+
+        .sidebar .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.2) !important;
+        }
+
+        .sidebar .nav-link span {
+            margin-right: 0.5rem;
+        }
+
+/* === BOTÃO HAMBÚRGUER === */
+.sidebar-toggle-btn {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1100;
+    background: rgba(236, 157, 158, 0.9);
+    border: none;
+    border-radius: 4px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: white;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: background 0.3s ease;
+}
+
+    .sidebar-toggle-btn:hover {
+        background: rgba(236, 157, 158, 1);
+    }
+
+/* === CONTEÚDO PRINCIPAL COMPACTO === */
+main {
+    flex: 1;
+    padding: 2rem 2rem 2rem 0.5rem; /* Reduzido de 1rem para 0.5rem à esquerda */
+    background-color: #f8dadb !important;
+    min-height: 100vh;
+    width: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: flex-end; /* Alinha o conteúdo à direita */
+}
+
+.content {
+    width: 95%; /* Conteúdo mais compacto */
+    max-width: 1200px; /* Largura máxima reduzida */
+    margin-right: 0; /* Reduzido de 2rem para 1rem */
+    margin-left: 0; /* Garante que não há margem à esquerda */
+}
+
+/* === CONTAINER COMPACTO === */
+.compact-container {
+    background-color: #f8dadb !important;
+    padding: 0;
+    margin: 0 auto;
+}
+
+/* === CARD FORMULÁRIO ROSA COMPACTO === */
+.card.formulario-rosa {
     background-color: #f5d1d3 !important;
     border: none !important;
     border-radius: 12px !important;
-    box-shadow: none !important;
-    margin: 0.5rem auto 1.5rem auto !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05) !important;
+    margin: 0.5rem 0 1.5rem 0 !important; /* Remove margem automática */
     max-width: 100% !important;
-    min-height: 220px !important;
+    min-height: 200px !important; /* Altura reduzida */
+    width: 100% !important;
 }
 
-    html body article.content .card.formulario-rosa .card-body {
+    .card.formulario-rosa .card-body {
         background-color: #f5d1d3 !important;
-        padding: 1.5rem !important;
+        padding: 1.2rem !important; /* Padding reduzido */
     }
 
-    /* TÍTULO DO CARD */
-    html body article.content .card.formulario-rosa h4 {
+    .card.formulario-rosa h4 {
         color: #333 !important;
-        font-size: 1.6rem !important;
+        font-size: 1.4rem !important; /* Fonte menor */
         font-weight: normal !important;
-        margin-bottom: 1.2rem !important;
-        text-align: left !important;
-        margin-top: 0 !important;
+        margin: 0 0 1rem 0 !important; /* Margem reduzida */
     }
 
-    /* FORMULÁRIO EM LINHA MAIS COMPACTO */
-    html body article.content .card.formulario-rosa .row {
+    .card.formulario-rosa .row {
         display: flex !important;
         flex-wrap: nowrap !important;
-        gap: 1.2rem !important;
+        gap: 1rem !important; /* Gap reduzido */
         align-items: flex-end !important;
-        margin-bottom: 1.2rem !important;
+        margin-bottom: 1rem !important; /* Margem reduzida */
     }
 
-    html body article.content .card.formulario-rosa .col-md-6 {
+    .card.formulario-rosa .col-md-6 {
         flex: 1 !important;
-        min-width: 160px !important;
+        min-width: 140px !important; /* Largura mínima reduzida */
     }
 
-    /* LABELS */
-    html body article.content .card.formulario-rosa .form-group-rosa label.form-label {
+    .card.formulario-rosa .form-group-rosa label.form-label {
         font-weight: 500 !important;
         color: #333 !important;
-        margin-bottom: 8px !important;
+        margin-bottom: 6px !important; /* Margem reduzida */
         display: block !important;
-        font-size: 1rem !important;
+        font-size: 0.9rem !important; /* Fonte menor */
     }
 
-    /* INPUTS (AGORA COM LARGURA CONTROLADA) */
-    html body article.content .card.formulario-rosa .form-group-rosa .form-control {
+    .card.formulario-rosa .form-group-rosa .form-control {
         background-color: white !important;
         border: 2px solid #e0e0e0 !important;
         border-radius: 8px !important;
-        padding: 8px 12px !important;
+        padding: 6px 10px !important; /* Padding reduzido */
         width: 100% !important;
-        max-width: 400px !important;
-        font-size: 1rem !important;
-        height: 38px !important;
+        max-width: 350px !important; /* Largura máxima reduzida */
+        font-size: 0.9rem !important; /* Fonte menor */
+        height: 36px !important; /* Altura reduzida */
         font-weight: 400 !important;
     }
 
-    /* Centralizar o input e botão (opcional) */
-    html body article.content .card.formulario-rosa .form-group-rosa {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
+    .card.formulario-rosa .btn,
+    .card.formulario-rosa .btn-success,
+    .card.formulario-rosa .btn-secondary {
+        font-weight: 400 !important;
+        padding: 5px 12px !important; /* Padding reduzido */
+        font-size: 0.9rem !important; /* Fonte menor */
+        border-radius: 4px !important;
+        margin-right: 4px !important; /* Margem reduzida */
     }
 
-/* BOTÕES DO FORMULÁRIO FINOS */
-.card.formulario-rosa .btn,
-.card.formulario-rosa .btn-success,
-.card.formulario-rosa .btn-secondary {
-    font-weight: 400 !important;
-    padding: 6px 14px !important;
-    font-size: 1rem !important;
-    border-radius: 4px !important;
-    margin-right: 6px !important;
-}
-
-/* BOTÕES NA MESMA LINHA */
-html body article.content .card.formulario-rosa .d-flex.flex-wrap {
-    gap: 10px !important;
-    margin-top: 1rem !important;
-}
-
-/* === TABELA ROSA === */
-html body article.content .horario-table {
+/* === TABELA ROSA COMPACTA === */
+.horario-table {
     background-color: #f5d1d3 !important;
     border-radius: 12px !important;
     overflow: hidden !important;
-    box-shadow: none !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05) !important;
     width: 100% !important;
     border-collapse: collapse !important;
     margin-top: 0.5rem !important;
+    font-size: 0.9rem !important; /* Fonte menor na tabela */
 }
 
-    /* CABEÇALHO DA TABELA */
-    html body article.content .horario-table thead {
+    .horario-table thead {
         background-color: #ebbec2 !important;
         border-bottom: 2px solid #dfb7bb !important;
     }
 
-    html body article.content .horario-table th {
-        background-color: #ebbec2 !important;
+    .horario-table th,
+    .horario-table td {
+        padding: 10px !important; /* Padding reduzido */
+        font-size: 0.9rem !important; /* Fonte menor */
         color: #333 !important;
-        font-weight: 600 !important;
-        padding: 12px !important;
-        border: none !important;
-        font-size: 1rem !important;
-        text-align: left !important;
-    }
-
-    /* CÉLULAS DA TABELA */
-    html body article.content .horario-table td {
-        background-color: #f5d1d3 !important;
-        padding: 10px 16px !important;
-        border-color: #dfb7bb !important;
-        font-size: 1rem !important;
         vertical-align: middle !important;
-        font-weight: 400 !important;
+        text-align: left !important;
+        border: none !important;
     }
 
-    /* BOTÕES PADRÃO NA TABELA */
-    html body article.content .horario-table .btn-outline-primary,
-    html body article.content .horario-table .btn-outline-danger {
-        padding: 6px 16px !important;
-        font-weight: 500 !important;
-        font-size: 1rem !important;
-        border-radius: 8px !important;
-        margin-right: 6px !important;
+    .horario-table td {
+        background-color: #f5d1d3 !important;
     }
 
-    html body article.content .horario-table .d-flex.flex-wrap {
-        gap: 7px !important;
-        flex-wrap: nowrap !important;
+    .horario-table .btn {
+        border-radius: 6px !important;
+        padding: 4px 12px !important; /* Padding reduzido */
+        margin-right: 4px !important; /* Margem reduzida */
+        font-size: 0.85rem !important; /* Fonte menor */
     }
 
-/* === TÍTULOS PRINCIPAIS === */
-html body article.content h3 {
+/* === TÍTULOS COMPACTOS === */
+h3 {
     color: #333 !important;
-    font-size: 1.6rem !important;
+    font-size: 1.4rem !important; /* Fonte menor */
     font-weight: 600 !important;
     text-align: center !important;
     margin-bottom: 0.5rem !important;
 }
 
-html body article.content h4 {
+h4 {
     color: #333 !important;
-    font-size: 1.2rem !important;
+    font-size: 1.1rem !important; /* Fonte menor */
     font-weight: 500 !important;
     text-align: left !important;
-    margin: 1.2rem 0 0.8rem 0 !important;
+    margin: 1rem 0 0.6rem 0 !important; /* Margens reduzidas */
+}
+
+/* === OVERLAY PARA SIDEBAR === */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: none;
+}
+
+.sidebar.active ~ .sidebar-overlay {
+    display: block;
+}
+
+/* === ESTILOS GLOBAIS PARA TODAS AS PÁGINAS === */
+.page-content {
+    width: 100%;
+}
+
+.page-title {
+    color: #333 !important;
+    font-size: 1.8rem !important;
+    font-weight: 600 !important;
+    text-align: left !important;
+    margin-bottom: 1.5rem !important;
+}
+
+.page-subtitle {
+    color: #333 !important;
+    font-size: 1.4rem !important;
+    font-weight: 500 !important;
+    text-align: left !important;
+    margin: 1.5rem 0 1rem 0 !important;
+}
+
+.table-container {
+    background-color: #f5d1d3 !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05) !important;
+    margin-bottom: 1.5rem !important;
+}
+
+.data-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 0.9rem !important;
+}
+
+    .data-table thead {
+        background-color: #ebbec2 !important;
+    }
+
+    .data-table th {
+        padding: 12px 10px !important;
+        font-weight: 600 !important;
+        color: #333 !important;
+        text-align: left !important;
+        border-bottom: 2px solid #dfb7bb !important;
+    }
+
+    .data-table td {
+        padding: 10px !important;
+        background-color: #f5d1d3 !important;
+        color: #333 !important;
+        border-bottom: 1px solid #e8c8ca !important;
+    }
+
+.btn-group {
+    display: flex !important;
+    gap: 4px !important;
+}
+
+.btn-small {
+    padding: 4px 8px !important;
+    font-size: 0.8rem !important;
+    border-radius: 4px !important;
 }
 
 /* === RESPONSIVIDADE === */
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
     .content {
-        padding: 1rem !important;
+        width: 90%;
+        margin-right: 1rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .content {
+        width: 95%;
+        margin-right: 0.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 280px;
     }
 
-    html body article.content .card.formulario-rosa {
-        margin: 0 1rem 1rem 1rem !important;
+    main {
+        padding: 1rem !important;
+        justify-content: center; /* Centraliza em mobile */
+    }
+
+    .content {
+        width: 100%;
+        margin-right: 0;
+    }
+
+    .card.formulario-rosa {
+        margin: 0 0 1rem 0 !important;
         min-height: auto !important;
     }
 
-        html body article.content .card.formulario-rosa .card-body {
+        .card.formulario-rosa .card-body {
             padding: 1rem !important;
         }
 
-        html body article.content .card.formulario-rosa .row {
+        .card.formulario-rosa .row {
             flex-wrap: wrap !important;
-            gap: 1rem !important;
+            gap: 0.8rem !important;
         }
 
-        html body article.content .card.formulario-rosa .form-group-rosa .form-control {
+        .card.formulario-rosa .form-group-rosa .form-control {
             max-width: 100% !important;
         }
+
+    .page-title {
+        font-size: 1.6rem !important;
+    }
+
+    .page-subtitle {
+        font-size: 1.3rem !important;
+    }
 }
 
-/* === AJUSTES DE RESPONSIVIDADE EXTRA PARA MOBILE === */
 @media (max-width: 576px) {
-    .d-flex.justify-content-between.align-items-center {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 0.5rem !important;
+    .sidebar {
+        width: 100%;
+        left: -100%;
     }
 
-    .table-responsive,
-    .horario-table {
-        display: block !important;
-        width: 100% !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
+    .sidebar-toggle-btn {
+        top: 10px;
+        left: 10px;
     }
 
-        .horario-table th,
-        .horario-table td {
-            font-size: 0.9rem !important;
-            white-space: nowrap !important;
-        }
-
-        .horario-table .d-flex.flex-wrap {
-            flex-direction: column !important;
-            align-items: stretch !important;
-        }
-
-        .horario-table .btn {
-            width: 100% !important;
-            margin: 3px 0 !important;
-        }
-
-    .card.formulario-rosa {
-        width: 100% !important;
-        max-width: 100% !important;
-    }
-
-        .card.formulario-rosa .form-control {
-            max-width: 100% !important;
-        }
-
-        .card.formulario-rosa .d-flex.flex-wrap {
-            flex-direction: column !important;
-            align-items: stretch !important;
-        }
-
-        .card.formulario-rosa .btn {
-            width: 100% !important;
-        }
-
-    html body article.content h3 {
-        font-size: 1.4rem !important;
-        text-align: center !important;
-    }
-
-    /* === Estilos que estavam inline no MyReservations === */
-    .table td, .table th {
-        white-space: nowrap;
-    }
-
-        .table td:last-child button {
-            width: 100%;
-            margin-bottom: 5px;
-        }
-
-    .alert {
-        word-break: break-word;
-    }
-}
-
-/* === AJUSTES PARA TABLETS === */
-@media (min-width: 577px) and (max-width: 992px) {
-    .horario-table th,
-    .horario-table td {
-        font-size: 1rem !important;
-    }
-
-    .card.formulario-rosa .form-control {
-        max-width: 100% !important;
+    main {
+        padding: 0.5rem !important;
     }
 
     .content {
-        padding: 1.5rem !important;
+        width: 100%;
+    }
+
+    .card.formulario-rosa .row {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+    }
+
+    .card.formulario-rosa .col-md-6 {
+        width: 100% !important;
+        min-width: auto !important;
+    }
+
+    .horario-table th,
+    .horario-table td {
+        padding: 8px !important;
+        font-size: 0.85rem !important;
+    }
+
+    h3 {
+        font-size: 1.3rem !important;
+    }
+
+    h4 {
+        font-size: 1rem !important;
+    }
+
+    .page-title {
+        font-size: 1.4rem !important;
+    }
+
+    .page-subtitle {
+        font-size: 1.2rem !important;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 8px !important;
+        font-size: 0.85rem !important;
     }
 }

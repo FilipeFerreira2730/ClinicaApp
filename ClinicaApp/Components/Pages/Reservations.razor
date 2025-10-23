@@ -102,7 +102,7 @@
 
                 <!-- ✅ Campo: Mensagem -->
                 <div class="mb-3 form-group-rosa">
-                    <label class="form-label">Observação (opcional)</label>
+                    <label class="form-label">Observações (opcional)</label>
                     <textarea class="form-control" @bind="mensagem" rows="3"
                               placeholder="Ex: Só vou usar a sala por 1 hora, ou Ocorreu um problema na sala..."></textarea>
                     <small class="form-text text-muted">Máximo 500 caracteres</small>
@@ -145,7 +145,7 @@
                         <th>Profissional</th>
                         <th>Início</th>
                         <th>Fim</th>
-                        <th>Observação</th>
+                        <th>Observações</th>
                         @if (usuarioLogado.RoleId == 1)
                         {
                             <th>Ações</th>

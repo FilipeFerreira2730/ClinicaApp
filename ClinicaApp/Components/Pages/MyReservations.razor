@@ -10,10 +10,12 @@
 
 @rendermode InteractiveServer
 
-<div class="container-fluid px-3 px-md-5 py-3">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2">
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <h3 class="mb-0">As Minhas Reservas</h3>
-        <button class="btn btn-outline-danger" @onclick="Logout">Sair</button>
+        <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-outline-danger" @onclick="Logout">Sair</button>
+        </div>
     </div>
 
     @if (isLoading)
@@ -47,9 +49,7 @@
                         @if (reservas == null || !reservas.Any())
                         {
                             <tr>
-                                <td colspan="5" class="text-center text-muted">
-                                    Não existem reservas.
-                                </td>
+                                <td colspan="5" class="text-center text-muted">Não existem reservas.</td>
                             </tr>
                         }
                         else
@@ -86,15 +86,9 @@
                                         }
                                     </td>
                                     <td>
-                                        <div class="d-flex flex-column flex-sm-row flex-wrap gap-1">
-                                            <button class="btn btn-sm btn-outline-primary"
-                                                    @onclick="() => EditarReserva(r)">
-                                                Editar
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger"
-                                                    @onclick="() => ApagarReserva(r.Id)">
-                                                Remover
-                                            </button>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            <button class="btn btn-sm btn-outline-primary" @onclick="() => EditarReserva(r)">Editar</button>
+                                            <button class="btn btn-sm btn-outline-danger" @onclick="() => ApagarReserva(r.Id)">Remover</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -134,7 +128,7 @@
                     {
                         <div class="mb-3 form-group-rosa">
                             <label class="form-label">Horários Disponíveis (@selectedDate.ToString("dd/MM/yyyy"))</label>
-                            <div class="row g-2">
+                            <div class="d-flex flex-wrap">
                                 @foreach (var kv in availableTimes)
                                 {
                                     var slotKey = kv.Key;
@@ -143,13 +137,11 @@
                                     var dotClass = isFree ? (isSelected ? "bg-primary" : "bg-success") : "bg-danger";
                                     var containerClass = isSelected ? "border-primary" : "border-secondary";
 
-                                    <div class="col-12 col-sm-6 col-md-4">
-                                        <div class="d-flex align-items-center border rounded px-3 py-2 @containerClass"
-                                             style="cursor:@(isFree ? "pointer" : "not-allowed");"
-                                             @onclick="() => ToggleTimeSlot(slotKey, isFree)">
-                                            <div class="rounded-circle @dotClass" style="width:14px; height:14px; margin-right:12px;"></div>
-                                            <div>@slotKey</div>
-                                        </div>
+                                    <div class="d-flex align-items-center border rounded px-3 py-2 m-1 @containerClass"
+                                         style="cursor:@(isFree ? "pointer" : "not-allowed"); min-width:180px;"
+                                         @onclick="() => ToggleTimeSlot(slotKey, isFree)">
+                                        <div class="rounded-circle @dotClass" style="width:14px; height:14px; margin-right:12px;"></div>
+                                        <div>@slotKey</div>
                                     </div>
                                 }
                             </div>
@@ -165,11 +157,13 @@
                         <small class="form-text text-muted">Máximo 500 caracteres</small>
                     </div>
 
-                    <div class="d-flex flex-column flex-sm-row flex-wrap gap-2 mt-4">
+                    <!-- Botões -->
+                    <div class="d-flex flex-wrap gap-2 mt-4">
                         <button class="btn btn-success" @onclick="SalvarEdicao">Guardar Alterações</button>
                         <button class="btn btn-secondary" @onclick="CancelarEdicao">Cancelar</button>
                     </div>
 
+                    <!-- Mensagens -->
                     @if (!string.IsNullOrEmpty(successMessage))
                     {
                         <div class="alert alert-success mt-3 mb-0">@successMessage</div>
