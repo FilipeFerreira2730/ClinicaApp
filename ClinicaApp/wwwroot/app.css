@@ -1,4 +1,4 @@
-/* =====================================
+Ôªø/* =====================================
    APP.CSS - LAYOUT AJUSTADO (CORRIGIDO)
    ===================================== */
 
@@ -12,7 +12,7 @@ html, body {
     line-height: 1.5 !important;
 }
 
-/* === CONTE⁄DO PRINCIPAL MAIS ¿ DIREITA === */
+/* === CONTE√öDO PRINCIPAL MAIS √Ä DIREITA === */
 .content {
     padding: 2rem 2rem 2rem 5rem !important;
     max-width: 1200px;
@@ -31,65 +31,65 @@ html body article.content .card.formulario-rosa {
     min-height: 220px !important;
 }
 
-html body article.content .card.formulario-rosa .card-body {
-    background-color: #f5d1d3 !important;
-    padding: 1.5rem !important;
-}
+    html body article.content .card.formulario-rosa .card-body {
+        background-color: #f5d1d3 !important;
+        padding: 1.5rem !important;
+    }
 
-/* TÕTULO DO CARD */
-html body article.content .card.formulario-rosa h4 {
-    color: #333 !important;
-    font-size: 1.6rem !important;
-    font-weight: normal !important;
-    margin-bottom: 1.2rem !important;
-    text-align: left !important;
-    margin-top: 0 !important;
-}
+    /* T√çTULO DO CARD */
+    html body article.content .card.formulario-rosa h4 {
+        color: #333 !important;
+        font-size: 1.6rem !important;
+        font-weight: normal !important;
+        margin-bottom: 1.2rem !important;
+        text-align: left !important;
+        margin-top: 0 !important;
+    }
 
-/* FORMUL¡RIO EM LINHA MAIS COMPACTO */
-html body article.content .card.formulario-rosa .row {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    gap: 1.2rem !important;
-    align-items: flex-end !important;
-    margin-bottom: 1.2rem !important;
-}
+    /* FORMUL√ÅRIO EM LINHA MAIS COMPACTO */
+    html body article.content .card.formulario-rosa .row {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        gap: 1.2rem !important;
+        align-items: flex-end !important;
+        margin-bottom: 1.2rem !important;
+    }
 
-html body article.content .card.formulario-rosa .col-md-6 {
-    flex: 1 !important;
-    min-width: 160px !important;
-}
+    html body article.content .card.formulario-rosa .col-md-6 {
+        flex: 1 !important;
+        min-width: 160px !important;
+    }
 
-/* LABELS */
-html body article.content .card.formulario-rosa .form-group-rosa label.form-label {
-    font-weight: 500 !important;
-    color: #333 !important;
-    margin-bottom: 8px !important;
-    display: block !important;
-    font-size: 1rem !important;
-}
+    /* LABELS */
+    html body article.content .card.formulario-rosa .form-group-rosa label.form-label {
+        font-weight: 500 !important;
+        color: #333 !important;
+        margin-bottom: 8px !important;
+        display: block !important;
+        font-size: 1rem !important;
+    }
 
-/* INPUTS (AGORA COM LARGURA CONTROLADA) */
-html body article.content .card.formulario-rosa .form-group-rosa .form-control {
-    background-color: white !important;
-    border: 2px solid #e0e0e0 !important;
-    border-radius: 8px !important;
-    padding: 8px 12px !important;
-    width: 100% !important;
-    max-width: 400px !important; /* ?? limita o comprimento */
-    font-size: 1rem !important;
-    height: 38px !important;
-    font-weight: 400 !important;
-}
+    /* INPUTS (AGORA COM LARGURA CONTROLADA) */
+    html body article.content .card.formulario-rosa .form-group-rosa .form-control {
+        background-color: white !important;
+        border: 2px solid #e0e0e0 !important;
+        border-radius: 8px !important;
+        padding: 8px 12px !important;
+        width: 100% !important;
+        max-width: 400px !important;
+        font-size: 1rem !important;
+        height: 38px !important;
+        font-weight: 400 !important;
+    }
 
-/* Centralizar o input e bot„o (opcional) */
-html body article.content .card.formulario-rosa .form-group-rosa {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start; /* muda para center se quiseres centralizar */
-}
+    /* Centralizar o input e bot√£o (opcional) */
+    html body article.content .card.formulario-rosa .form-group-rosa {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
 
-/* BOT’ES DO FORMUL¡RIO FINOS */
+/* BOT√ïES DO FORMUL√ÅRIO FINOS */
 .card.formulario-rosa .btn,
 .card.formulario-rosa .btn-success,
 .card.formulario-rosa .btn-secondary {
@@ -100,7 +100,7 @@ html body article.content .card.formulario-rosa .form-group-rosa {
     margin-right: 6px !important;
 }
 
-/* BOT’ES NA MESMA LINHA */
+/* BOT√ïES NA MESMA LINHA */
 html body article.content .card.formulario-rosa .d-flex.flex-wrap {
     gap: 10px !important;
     margin-top: 1rem !important;
@@ -117,48 +117,48 @@ html body article.content .horario-table {
     margin-top: 0.5rem !important;
 }
 
-/* CABE«ALHO DA TABELA */
-html body article.content .horario-table thead {
-    background-color: #ebbec2 !important;
-    border-bottom: 2px solid #dfb7bb !important;
-}
+    /* CABE√áALHO DA TABELA */
+    html body article.content .horario-table thead {
+        background-color: #ebbec2 !important;
+        border-bottom: 2px solid #dfb7bb !important;
+    }
 
-html body article.content .horario-table th {
-    background-color: #ebbec2 !important;
-    color: #333 !important;
-    font-weight: 600 !important;
-    padding: 12px !important;
-    border: none !important;
-    font-size: 1rem !important;
-    text-align: left !important;
-}
+    html body article.content .horario-table th {
+        background-color: #ebbec2 !important;
+        color: #333 !important;
+        font-weight: 600 !important;
+        padding: 12px !important;
+        border: none !important;
+        font-size: 1rem !important;
+        text-align: left !important;
+    }
 
-/* C…LULAS DA TABELA */
-html body article.content .horario-table td {
-    background-color: #f5d1d3 !important;
-    padding: 10px 16px !important;
-    border-color: #dfb7bb !important;
-    font-size: 1rem !important;
-    vertical-align: middle !important;
-    font-weight: 400 !important;
-}
+    /* C√âLULAS DA TABELA */
+    html body article.content .horario-table td {
+        background-color: #f5d1d3 !important;
+        padding: 10px 16px !important;
+        border-color: #dfb7bb !important;
+        font-size: 1rem !important;
+        vertical-align: middle !important;
+        font-weight: 400 !important;
+    }
 
-/* BOT’ES PADR√O NA TABELA */
-html body article.content .horario-table .btn-outline-primary,
-html body article.content .horario-table .btn-outline-danger {
-    padding: 6px 16px !important;
-    font-weight: 500 !important;
-    font-size: 1rem !important;
-    border-radius: 8px !important;
-    margin-right: 6px !important;
-}
+    /* BOT√ïES PADR√ÉO NA TABELA */
+    html body article.content .horario-table .btn-outline-primary,
+    html body article.content .horario-table .btn-outline-danger {
+        padding: 6px 16px !important;
+        font-weight: 500 !important;
+        font-size: 1rem !important;
+        border-radius: 8px !important;
+        margin-right: 6px !important;
+    }
 
-html body article.content .horario-table .d-flex.flex-wrap {
-    gap: 7px !important;
-    flex-wrap: nowrap !important;
-}
+    html body article.content .horario-table .d-flex.flex-wrap {
+        gap: 7px !important;
+        flex-wrap: nowrap !important;
+    }
 
-/* === TÕTULOS PRINCIPAIS === */
+/* === T√çTULOS PRINCIPAIS === */
 html body article.content h3 {
     color: #333 !important;
     font-size: 1.6rem !important;
@@ -186,16 +186,102 @@ html body article.content h4 {
         min-height: auto !important;
     }
 
-    html body article.content .card.formulario-rosa .card-body {
-        padding: 1rem !important;
+        html body article.content .card.formulario-rosa .card-body {
+            padding: 1rem !important;
+        }
+
+        html body article.content .card.formulario-rosa .row {
+            flex-wrap: wrap !important;
+            gap: 1rem !important;
+        }
+
+        html body article.content .card.formulario-rosa .form-group-rosa .form-control {
+            max-width: 100% !important;
+        }
+}
+
+/* === AJUSTES DE RESPONSIVIDADE EXTRA PARA MOBILE === */
+@media (max-width: 576px) {
+    .d-flex.justify-content-between.align-items-center {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.5rem !important;
     }
 
-    html body article.content .card.formulario-rosa .row {
-        flex-wrap: wrap !important;
-        gap: 1rem !important;
+    .table-responsive,
+    .horario-table {
+        display: block !important;
+        width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
     }
 
-    html body article.content .card.formulario-rosa .form-group-rosa .form-control {
-        max-width: 100% !important; /* ?? em mobile, volta a ocupar toda a largura */
+        .horario-table th,
+        .horario-table td {
+            font-size: 0.9rem !important;
+            white-space: nowrap !important;
+        }
+
+        .horario-table .d-flex.flex-wrap {
+            flex-direction: column !important;
+            align-items: stretch !important;
+        }
+
+        .horario-table .btn {
+            width: 100% !important;
+            margin: 3px 0 !important;
+        }
+
+    .card.formulario-rosa {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+        .card.formulario-rosa .form-control {
+            max-width: 100% !important;
+        }
+
+        .card.formulario-rosa .d-flex.flex-wrap {
+            flex-direction: column !important;
+            align-items: stretch !important;
+        }
+
+        .card.formulario-rosa .btn {
+            width: 100% !important;
+        }
+
+    html body article.content h3 {
+        font-size: 1.4rem !important;
+        text-align: center !important;
+    }
+
+    /* === Estilos que estavam inline no MyReservations === */
+    .table td, .table th {
+        white-space: nowrap;
+    }
+
+        .table td:last-child button {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+
+    .alert {
+        word-break: break-word;
+    }
+}
+
+/* === AJUSTES PARA TABLETS === */
+@media (min-width: 577px) and (max-width: 992px) {
+    .horario-table th,
+    .horario-table td {
+        font-size: 1rem !important;
+    }
+
+    .card.formulario-rosa .form-control {
+        max-width: 100% !important;
+    }
+
+    .content {
+        padding: 1.5rem !important;
     }
 }

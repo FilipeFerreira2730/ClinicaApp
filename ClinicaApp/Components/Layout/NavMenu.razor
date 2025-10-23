@@ -4,7 +4,14 @@
 
 @rendermode InteractiveServer
 
-<div class="sidebar p-3" style="background: linear-gradient(180deg, #ec9d9e 0%, #f0b0b1 100%) !important; height: 100vh; color: white;">
+<!-- BOTÃO TOGGLE (MOBILE) -->
+<button class="sidebar-toggle-btn" @onclick="ToggleSidebar">
+    ☰
+</button>
+
+<!-- SIDEBAR -->
+<div class="sidebar p-3 @(sidebarOpen ? "active" : "")"
+     style="background: linear-gradient(180deg, #ec9d9e 0%, #f0b0b1 100%) !important; height: 100vh; color: white;">
     <!-- Cabeçalho da Sidebar -->
     <div class="mb-4">
         <div class="d-flex align-items-center">
@@ -50,6 +57,7 @@
 
 @code {
     private UserDto? usuarioLogado;
+    private bool sidebarOpen = false;
 
     protected override void OnInitialized()
     {
@@ -66,5 +74,10 @@
     public void Dispose()
     {
         UserState.OnChange -= OnUserChanged;
+    }
+
+    private void ToggleSidebar()
+    {
+        sidebarOpen = !sidebarOpen;
     }
 }
