@@ -229,7 +229,28 @@
         try
         {
             var todas = await Http.GetFromJsonAsync<List<ReservaDto>>("reservas");
-            reservas = todas?.Where(r => r.UserId == usuarioLogado!.Id).ToList();
+            var profissionais = await Http.GetFromJsonAsync<List<ProfissionalDto>>("profissionais");
+
+            if (todas == null)
+            {
+                reservas = new List<ReservaDto>();
+                return;
+            }
+
+            // Obter o profissional associado ao utilizador logado
+            var prof = profissionais.FirstOrDefault(p => p.UserId == usuarioLogado!.Id);
+            if (prof == null)
+            {
+                reservas = new List<ReservaDto>();
+                await ShowErrorMessage("Não foi encontrado um profissional associado a este utilizador.");
+                return;
+            }
+
+            // Mostrar apenas reservas onde o profissional é o responsável
+            reservas = todas
+                .Where(r => r.ProfissionalId == prof.Id)
+                .OrderBy(r => r.DataHoraInicio)
+                .ToList();
         }
         catch (Exception ex)
         {
@@ -346,30 +367,30 @@
     }
 
     private async Task ApagarReserva(int id)
-    {
-        var confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Tem a certeza que deseja apagar esta reserva?");
-        if (!confirm) return;
+{
+    var confirm = await JsRuntime.InvokeAsync<bool>("confirm", "Tem a certeza que deseja apagar esta reserva?");
+    if (!confirm) return;
 
-        try
+    try
+    {
+        var response = await Http.DeleteAsync($"reservas/{id}");
+        if (response.IsSuccessStatusCode)
         {
-            var response = await Http.DeleteAsync($"reservas/{id}");
-            if (response.IsSuccessStatusCode)
-            {
-                await ShowSuccessMessage("Reserva apagada com sucesso!");
-                mensagemVisivel = null;
-                await CarregarReservas();
-            }
-            else
-            {
-                var body = await response.Content.ReadAsStringAsync();
-                await ShowErrorMessage($"Erro ao apagar: {body}");
-            }
+            await ShowSuccessMessage("Reserva removida com sucesso!");
+            mensagemVisivel = null;
+            await CarregarReservas();
         }
-        catch (Exception ex)
+        else
         {
-            await ShowErrorMessage($"Erro inesperado: {ex.Message}");
+            var body = await response.Content.ReadAsStringAsync();
+            await ShowErrorMessage($"Erro ao apagar: {body}");
         }
     }
+    catch (Exception ex)
+    {
+        await ShowErrorMessage($"Erro inesperado: {ex.Message}");
+    }
+}
 
     private async Task ShowSuccessMessage(string message)
     {

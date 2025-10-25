@@ -227,13 +227,59 @@
         errorMessage = string.Empty;
     }
 
+    private bool IsValidEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return false;
+
+        try
+        {
+            var addr = new System.Net.Mail.MailAddress(email);
+            return addr.Address == email;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private bool IsValidPhoneNumber(string phone)
+    {
+        if (string.IsNullOrWhiteSpace(phone))
+            return false;
+
+        var digits = new string(phone.Where(char.IsDigit).ToArray());
+        return digits.Length == 9;
+    }
+
+    private async Task<bool> EmailExists(string email, int? excludeUserId = null)
+    {
+        try
+        {
+            if (users != null)
+            {
+                var existingUser = users.FirstOrDefault(u =>
+                    u.Email.Equals(email, StringComparison.OrdinalIgnoreCase) &&
+                    u.Id != excludeUserId);
+
+                if (existingUser != null)
+                    return true;
+            }
+
+            return false;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     private async Task SaveUser()
     {
         isLoading = true;
         successMessage = string.Empty;
         errorMessage = string.Empty;
 
-        // Validações básicas
         if (string.IsNullOrWhiteSpace(currentUser.Nome))
         {
             await ShowErrorMessage("O nome é obrigatório.");
@@ -248,18 +294,45 @@
             return;
         }
 
+        if (!IsValidEmail(currentUser.Email))
+        {
+            await ShowErrorMessage("Por favor, insira um email válido (ex: nome@exemplo.com).");
+            isLoading = false;
+            return;
+        }
+
+        var emailAlreadyExists = await EmailExists(currentUser.Email, editMode ? currentUser.Id : null);
+        if (emailAlreadyExists)
+        {
+            await ShowErrorMessage("Este email já está a ser utilizado por outro utilizador.");
+            isLoading = false;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(currentUser.Telefone))
+        {
+            await ShowErrorMessage("O número de telemóvel é obrigatório.");
+            isLoading = false;
+            return;
+        }
+
+        if (!IsValidPhoneNumber(currentUser.Telefone))
+        {
+            await ShowErrorMessage("O número de telemóvel deve ter exatamente 9 dígitos.");
+            isLoading = false;
+            return;
+        }
+
         try
         {
             HttpResponseMessage response;
 
             if (editMode && currentUser.Id > 0)
             {
-                // EDIÇÃO
                 response = await Http.PutAsJsonAsync($"users/{currentUser.Id}", currentUser);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    // Atualizar profissional se tiver especialidade
                     if (!string.IsNullOrWhiteSpace(currentProfissional.Especialidade))
                     {
                         if (currentProfissional.Id > 0)
@@ -277,7 +350,7 @@
                     }
 
                     await ShowSuccessMessage("Profissional editado com sucesso!");
-                    await LoadUsers(); // Recarregar da API
+                    await LoadUsers();
                 }
                 else
                 {
@@ -288,7 +361,6 @@
             }
             else
             {
-                // CRIAÇÃO - CORREÇÃO AQUI
                 response = await Http.PostAsJsonAsync("users", currentUser);
                 var responseBody = await response.Content.ReadAsStringAsync();
 
@@ -298,7 +370,6 @@
 
                     if (novoUser != null)
                     {
-                        // Criar profissional se tiver especialidade
                         if (!string.IsNullOrWhiteSpace(currentProfissional.Especialidade))
                         {
                             var profissionalResponse = await Http.PostAsJsonAsync("profissionais", new
@@ -309,7 +380,6 @@
 
                             if (profissionalResponse.IsSuccessStatusCode)
                             {
-                                // Atualizar a lista LOCALMENTE com o novo profissional
                                 novoUser.Profissional = new ProfissionalDto
                                 {
                                     UserId = novoUser.Id,
@@ -318,7 +388,6 @@
                             }
                         }
 
-                        // Adicionar o novo user à lista local
                         users ??= new List<UserDto>();
                         users.Add(novoUser);
 
@@ -332,7 +401,6 @@
                 }
             }
 
-            // Reset do formulário
             currentUser = new UserDto();
             currentProfissional = new ProfissionalDto();
             editMode = false;

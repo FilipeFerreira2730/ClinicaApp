@@ -99,7 +99,6 @@
                         RoleNome = userFromApi.RoleNome
                     };
 
-                    // Carregar dados do profissional
                     if (userFromApi.Profissional != null)
                     {
                         currentProfissional = new ProfissionalDto
@@ -111,7 +110,6 @@
                     }
                     else
                     {
-                        // Caso ainda não exista profissional
                         currentProfissional = new ProfissionalDto
                         {
                             UserId = userFromApi.Id
@@ -128,15 +126,72 @@
         }
     }
 
+    private bool IsValidEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return false;
+        try
+        {
+            var addr = new System.Net.Mail.MailAddress(email);
+            return addr.Address == email;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private bool IsValidPhoneNumber(string phone)
+    {
+        if (string.IsNullOrWhiteSpace(phone))
+            return false;
+        var digits = new string(phone.Where(char.IsDigit).ToArray());
+        return digits.Length == 9;
+    }
+
     private async Task SaveUser()
     {
         isLoading = true;
         errorMessage = string.Empty;
         successMessage = string.Empty;
 
+        if (string.IsNullOrWhiteSpace(currentUser.Nome))
+        {
+            await ShowErrorMessage("O nome é obrigatório.");
+            isLoading = false;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(currentUser.Email))
+        {
+            await ShowErrorMessage("O email é obrigatório.");
+            isLoading = false;
+            return;
+        }
+
+        if (!IsValidEmail(currentUser.Email))
+        {
+            await ShowErrorMessage("Por favor, insira um email válido (ex: nome@exemplo.com).");
+            isLoading = false;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(currentUser.Telefone))
+        {
+            await ShowErrorMessage("O número de telemóvel é obrigatório.");
+            isLoading = false;
+            return;
+        }
+
+        if (!IsValidPhoneNumber(currentUser.Telefone))
+        {
+            await ShowErrorMessage("O número de telemóvel deve ter exatamente 9 dígitos.");
+            isLoading = false;
+            return;
+        }
+
         try
         {
-            // Atualiza usuário completo, incluindo Telefone
             var response = await Http.PutAsJsonAsync($"users/{currentUser.Id}", currentUser);
             if (!response.IsSuccessStatusCode)
             {
@@ -145,7 +200,6 @@
                 return;
             }
 
-            // Atualiza ou cria profissional
             if (!string.IsNullOrWhiteSpace(currentProfissional.Especialidade))
             {
                 if (currentProfissional.Id > 0)
@@ -159,7 +213,6 @@
 
             await ShowSuccessMessage("Perfil atualizado com sucesso!");
 
-            // Atualiza o usuário na sessão
             await SessionStorage.SetAsync("usuarioLogado", currentUser);
         }
         catch (Exception ex)
@@ -172,6 +225,7 @@
             StateHasChanged();
         }
     }
+
 
     private async Task ShowSuccessMessage(string message)
     {
